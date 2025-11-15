@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Recommendations - Moodflix</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .navbar-brand { font-weight: 700; font-size: 1.5rem; letter-spacing: 1px; }
+    .camera-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 107, 107, 0.5);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    video, canvas {
+      width: 100%;
+      display: block;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .btn-capture {
+      background: #ff6b6b;
+      border: none;
+      color: #fff;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-capture:hover {
+      background: #ff5252;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+    }
+    .btn-capture:disabled {
+      background: #999;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .info-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    .emotion-display {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255, 107, 107, 0.1);
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+    .emotion-label {
+      font-size: 0.9rem;
+      color: #bbb;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .emotion-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ff6b6b;
+    }
+    .confidence {
+      font-size: 0.9rem;
+      color: #ddd;
+      margin-top: 0.5rem;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      border-top-color: #ff6b6b;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .status-message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      display: none;
+    }
+    .status-message.success {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+      border: 1px solid #4caf50;
+      display: block;
+    }
+    .status-message.error {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+      border: 1px solid #f44336;
+      display: block;
+    }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 2rem 0 1rem 0;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid #ff6b6b;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .back-btn {
+      color: #ff6b6b;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+    .back-btn:hover { color: #fff; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-dark mb-5 pt-4">
+    <div class="container-fluid ps-4">
+      <a href="networkproject.html" class="back-btn"><i class="bi bi-chevron-left"></i> Back</a>
+      <span class="navbar-brand"><i class="bi bi-play-circle"></i> Moodflix AI</span>
+    </div>
+  </nav>
+
+  <div class="container-fluid ps-5 pe-5">
+    <!-- Status Messages -->
+    <div id="statusMessage" class="status-message"></div>
+    <div id="apiStatus" class="info-card" style="display: none;">
+      <i class="bi bi-exclamation-circle"></i> API server not found. Please start api_server.py
+    </div>
+
+    <!-- Camera Section -->
+    <h2 class="section-title"><i class="bi bi-camera-video"></i> Capture Your Emotion</h2>
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="camera-container">
+          <video id="video" playsinline autoplay></video>
+          <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+
+        <div class="controls">
+          <button class="btn-capture" id="captureBtn">
+            <i class="bi bi-camera-fill"></i> Capture
+          </button>
+          <button class="btn-capture" id="getRecommendationsBtn" disabled>
+            <i class="bi bi-magic"></i> Get Recommendations
+          </button>
+        </div>
+
+        <!-- Emotion Display -->
+        <div id="emotionDisplay" style="display: none;">
+          <div class="emotion-display">
+            <div class="emotion-label">Detected Emotion</div>
+            <div class="emotion-value" id="emotionValue">—</div>
+            <div class="confidence" id="confidenceValue"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Context Info -->
+    <div id="contextInfo" style="display: none;">
+      <h2 class="section-title"><i class="bi bi-info-circle"></i> Your Context</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="info-card">
+            <p><strong>📍 Location:</strong> <span id="cityName">—</span></p>
+            <p><strong>🌤️ Weather:</strong> <span id="weatherDesc">—</span></p>
+            <p><strong>🌡️ Temperature:</strong> <span id="tempValue">—</span>°C</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-card">
+            <p><strong>📅 Day:</strong> <span id="dayStatus">—</span> (<span id="weekday">—</span>)</p>
+            <p><strong>😊 Mood:</strong> <span id="moodStatus">—</span></p>
+            <p><strong>🎤 Voice Tone:</strong> <span id="voiceStatus">—</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    <div id="recommendationsSection" style="display: none;">
+      <h2 class="section-title"><i class="bi bi-sparkles"></i> AI Recommended For You</h2>
+      <p id="recommendationReasoning" style="color: #ddd; margin-bottom: 2rem;"></p>
+      <div class="row g-4" id="recommendationsContainer"></div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" style="display: none; text-align: center; padding: 2rem;">
+      <div class="loading-spinner"></div>
+      <p style="margin-top: 1rem;">Analyzing your emotion and preferences...</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="data.js" defer></script>
+  <script src="api.js" defer></script>
+  <script src="emotion-detector.js" defer></script>
+</body>
+</html>
