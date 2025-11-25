@@ -4,7 +4,7 @@ import RecommendationCard from '../components/RecommendationCard';
 
 
 
-function RecommendationsPage({ recommendations, setView, isLoading, error, onMovieClick }) {
+function RecommendationsPage({ recommendations, isLoading, error, onSelectMovie, onRecapture, }) {
     return (
         <div style={styles.page}>
             {/* Header */}
@@ -19,7 +19,7 @@ function RecommendationsPage({ recommendations, setView, isLoading, error, onMov
             <div style={styles.container}>
                 {/* AI Recommendation Button */}
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <GetRecommendationButton onClick={() => setView('capture')}
+                    <GetRecommendationButton onClick={onRecapture}
                         style={{ width: "200px" } }>
                         <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>✨</span>
                         Get AI Recommendations
@@ -58,7 +58,7 @@ function RecommendationsPage({ recommendations, setView, isLoading, error, onMov
                                         title={movie.title}
                                         rating={movie.rating}
                                         posterUrl={movie.posterUrl}
-                                        onClick={() => onMovieClick(detail)}
+                                        onClick={() => onSelectMovie(movie.tmdbId)}
                                     />
                                 </div>
                             ))
