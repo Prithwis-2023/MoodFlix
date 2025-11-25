@@ -1,4 +1,14 @@
-# Ignore files
+# Node.js Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+build/
+.vite/
+*.local
 
 # Python
 __pycache__/
@@ -8,25 +18,37 @@ __pycache__/
 .Python
 env/
 venv/
-.venv
+.venv/
+ENV/
 *.egg-info/
-dist/
-build/
 
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.vs/
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Data (optional - uncomment if you want to share user logs)
-# user_logs.csv
+*.log
 
 # Environment variables
 .env
 .env.local
+.env.production
+.env.development
+
+# User data
+user_logs.csv
+
+# Testing
+coverage/
+.nyc_output/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

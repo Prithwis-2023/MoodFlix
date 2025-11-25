@@ -1,6 +1,6 @@
 /**
  * Moodflix API Service
- * Handles all communication with the AI backend
+ * Handles all communication with the AI backend and TMDB-like data
  */
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -8,7 +8,7 @@ const API_BASE_URL = 'http://localhost:5000/api';
 /**
  * Fetch context: location, weather, day info
  */
-async function getContext() {
+export async function getContext() {
   try {
     const response = await fetch(`${API_BASE_URL}/context`);
     if (!response.ok) throw new Error('Failed to fetch context');
@@ -22,7 +22,7 @@ async function getContext() {
 /**
  * Detect emotion from image (base64)
  */
-async function detectEmotion(imageBase64) {
+export async function detectEmotion(imageBase64) {
   try {
     const response = await fetch(`${API_BASE_URL}/emotion`, {
       method: 'POST',
@@ -40,7 +40,7 @@ async function detectEmotion(imageBase64) {
 /**
  * Get AI movie recommendations
  */
-async function getRecommendations(emotionData, contextData, watchedMovies = []) {
+export async function getMovieRecommendations(emotionData, contextData, watchedMovies = [], availableMovies = []) {
   try {
     const response = await fetch(`${API_BASE_URL}/recommend`, {
       method: 'POST',
@@ -53,7 +53,7 @@ async function getRecommendations(emotionData, contextData, watchedMovies = []) 
         today_status: contextData.today_status || 'Weekday',
         watched_movies: watchedMovies,
         voice_tone: emotionData.voice_tone || 'neutral',
-        available_movies: movies.map(m => m.title) // Pass available movies from data.js
+        available_movies: availableMovies
       })
     });
     if (!response.ok) throw new Error('Failed to get recommendations');
@@ -67,17 +67,17 @@ async function getRecommendations(emotionData, contextData, watchedMovies = []) 
 /**
  * Log user's movie selection
  */
-async function logSelection(movieTitle, emotion, context) {
+export async function logSelection(movieTitle, emotion, context) {
   try {
     const response = await fetch(`${API_BASE_URL}/log-selection`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         movie: movieTitle,
-        mood: emotion,
+        mood: emotion.emotion || 'neutral',
         voice_tone: emotion.voice_tone || 'neutral',
         city: context.city || 'Unknown',
-        latitude: 0, // Would be from actual location
+        latitude: 0,
         longitude: 0,
         today_status: context.today_status || 'Weekday',
         tomorrow_status: context.tomorrow_status || 'Weekday',
@@ -96,7 +96,7 @@ async function logSelection(movieTitle, emotion, context) {
 /**
  * Check if API server is running
  */
-async function checkAPIHealth() {
+export async function checkAPIHealth() {
   try {
     const response = await fetch(`${API_BASE_URL}/health`);
     return response.ok;
@@ -108,6 +108,6 @@ async function checkAPIHealth() {
 /**
  * Capture image from canvas
  */
-function captureCanvasAsBase64(canvasElement) {
-  return canvasElement.toDataURL('image/jpeg', 0.8).split(',')[1]; // Remove "data:image/jpeg;base64," prefix
+export function captureCanvasAsBase64(canvasElement) {
+  return canvasElement.toDataURL('image/jpeg', 0.8).split(',')[1];
 }
