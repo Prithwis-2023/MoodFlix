@@ -18,54 +18,45 @@ An AI-powered movie recommendation platform that uses emotion detection, weather
 ```
 moodflix/
 ├── src/
-│   ├── main.jsx                  # React entry point
-│   ├── App.jsx                   # Main app component with routing
+│   ├── main.jsx                    # React entry point
+│   ├── App.jsx                     # Main app component with routing
 │   ├── pages/
-│   │   ├── HomePage.jsx          # Main page (movie/series list)
-│   │   ├── EmotionDetectorPage.jsx  # Emotion capture & recommendations
-│   │   └── MovieDetailPage.jsx   # Movie detail page
+│   │   ├── HomePage.jsx            # Main page (movie/series list)
+│   │   ├── EmotionDetectorPage.jsx # Emotion capture & recommendations
+│   │   └── MovieDetailPage.jsx     # Movie detail page
 │   ├── api/
-│   │   ├── apiService.js         # Backend API service
-│   │   └── tmdbApi.js            # Movie data API wrapper
+│   │   ├── apiService.js           # Backend API service
+│   │   └── tmdbApi.js              # Movie data API wrapper
 │   ├── data/
-│   │   └── content.js            # Movies & series data
+│   │   └── content.js              # Movies & series data
 │   └── styles/
-│       └── MoodflixStyles.css    # Custom styles
-├── images/                       # Movie poster images
-├── index.html                    # HTML entry point
-├── vite.config.js                # Vite configuration
-├── package.json                  # Node dependencies
-├── api_server.py                 # Flask backend API
-├── .gitignore                    # Git ignore rules
-├── README.md                     # Project documentation
-├── SETUP.md                      # Setup instructions
-└── REACT_MIGRATION.md            # Migration guide
+│       └── MoodflixStyles.css      # Custom styles
+├── public/
+│   ├── 404.html                    # SPA redirect handler
+│   └── images/                     # Movie poster images
+├── vite.config.js                  # Vite configuration
+├── package.json                    # Node dependencies
+├── api_server.py                   # Flask backend API (optional)
+├── api_server_simple.py            # Simplified backend (optional)
+├── requirements.txt                # Python dependencies
+├── DEPLOYMENT.md                   # Deployment guide
+└── README.md                       # Project documentation
 ```
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.8+
+### Live Demo
+**Visit the deployed app:** [https://jaden769.github.io/MoodFlix/](https://jaden769.github.io/MoodFlix/)
+
+The app is deployed on GitHub Pages and works without backend setup. AI features require backend deployment (optional).
+
+### Local Development
+
+#### Prerequisites
 - Node.js 16+ and npm
-- Flask: `pip install flask flask-cors`
-- DeepFace & dependencies: `pip install deepface opencv-python librosa sounddevice`
-- Ollama installed and running: https://ollama.ai
+- Python 3.8+ (optional, for AI backend)
 
-### Backend Setup (API Server)
-
-1. Install dependencies:
-```bash
-pip install flask flask-cors cv2 deepface librosa sounddevice pandas scikit-learn requests geocoder geopy holidays
-```
-
-2. Start the API server:
-```bash
-python api_server.py
-```
-
-The server will run on `http://localhost:5000`
-
-### Frontend Setup (React + Vite)
+#### Frontend Setup (Required)
 
 1. Install dependencies:
 ```bash
@@ -77,19 +68,33 @@ npm install
 npm run dev
 ```
 
-The app will run on `http://localhost:5500`
-
 3. Open your browser and navigate to `http://localhost:5500`
+
+#### Backend Setup (Optional - for AI features)
+
+1. Install Python dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Start the API server:
+```bash
+python api_server.py
+```
+
+The server will run on `http://localhost:5000`
+
+**Note:** Backend is optional. The app works without it, but AI emotion detection requires the backend.
 
 ## 📱 Usage
 
 1. **Browse Movies** — View the main movie and series catalog on the homepage
-2. **Click "Get AI Recommendations"** — Navigate to the emotion detection page
-3. **Allow Webcam Access** — Grant camera permission when prompted
-4. **Capture Emotion** — Click "Capture Emotion" button (good lighting recommended)
-5. **Get Recommendations** — Click "Get Recommendations" after emotion is detected
-6. **View Personalized Suggestions** — System analyzes emotion + context and recommends movies
-7. **Select Movie** — Click any recommendation to see full details
+2. **View Movie Details** — Click on any movie card to see full information
+3. **AI Recommendations (requires backend):**
+   - Navigate to the emotion detection page
+   - Allow webcam access when prompted
+   - Click "Capture Emotion" (good lighting recommended)
+   - Get AI-powered personalized movie suggestions
 
 ## 🔌 API Endpoints
 
@@ -220,18 +225,29 @@ DURATION = 10                        # Audio recording duration
 | "Weather API error" | Verify internet connection and API key |
 | "Module not found" | Run `npm install` to install dependencies |
 
+## 🚀 Deployment
+
+The app is deployed on GitHub Pages at: https://jaden769.github.io/MoodFlix/
+
+To deploy your own version:
+
+```bash
+npm run build        # Build for production
+npm run deploy       # Deploy to GitHub Pages
+```
+
+For backend deployment, see [DEPLOYMENT.md](DEPLOYMENT.md)
+
 ## 🚀 Future Enhancements
 
 - [x] React migration for modern component-based architecture
 - [x] Client-side routing with React Router
+- [x] GitHub Pages deployment
+- [ ] Backend deployment to Render
 - [ ] User authentication & profiles
-- [ ] Database migration (SQLite/PostgreSQL)
-- [ ] Save trained ML model to file
-- [ ] Real-time WebSocket updates
-- [ ] Mobile app version (React Native)
+- [ ] Real TMDB API integration
 - [ ] Trailer playback integration
 - [ ] Social recommendations (friends' picks)
-- [ ] Advanced analytics dashboard
 - [ ] TypeScript migration for type safety
 
 ## 📝 License

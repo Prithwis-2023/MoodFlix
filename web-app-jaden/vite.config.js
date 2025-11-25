@@ -5,12 +5,6 @@ export default defineConfig({
   plugins: [react()],
   base: '/MoodFlix/',
   server: {
-    port: 5500,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      }
-    }
+    port: 5500
   }
 })

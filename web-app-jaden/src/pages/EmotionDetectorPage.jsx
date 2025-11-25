@@ -20,21 +20,13 @@ function EmotionDetectorPage() {
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
-  const [apiHealthy, setApiHealthy] = useState(true);
+  const [apiHealthy, setApiHealthy] = useState(false);
 
   useEffect(() => {
     const init = async () => {
       // Check API health
       const isHealthy = await checkAPIHealth();
       setApiHealthy(isHealthy);
-      
-      if (!isHealthy) {
-        setMessage({
-          text: 'API server is not running. Start api_server.py to use AI recommendations.',
-          type: 'error'
-        });
-        return;
-      }
 
       // Initialize webcam
       try {
@@ -53,9 +45,11 @@ function EmotionDetectorPage() {
         });
       }
 
-      // Load context
-      const context = await getContext();
-      setCurrentContext(context);
+      // Load context if API is available
+      if (isHealthy) {
+        const context = await getContext();
+        setCurrentContext(context);
+      }
     };
 
     init();
@@ -68,6 +62,14 @@ function EmotionDetectorPage() {
   }, []);
 
   const handleCaptureEmotion = async () => {
+    if (!apiHealthy) {
+      setMessage({
+        text: '⚠️ Backend not connected. Deploy api_server.py for AI emotion detection.',
+        type: 'error'
+      });
+      return;
+    }
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
     
@@ -190,7 +192,6 @@ function EmotionDetectorPage() {
                 className="btn btn-primary btn-lg me-3"
                 onClick={handleCaptureEmotion}
                 disabled={loading}
-                title={!apiHealthy ? "Camera will work, but AI detection requires backend deployment" : ""}
               >
                 <i className="bi bi-camera"></i> Capture Emotion
               </button>
@@ -198,7 +199,6 @@ function EmotionDetectorPage() {
                 className="btn btn-success btn-lg"
                 onClick={handleGetRecommendations}
                 disabled={loading || !currentEmotion}
-                title={!apiHealthy ? "Requires backend deployment for AI recommendations" : ""}
               >
                 <i className="bi bi-stars"></i> Get Recommendations
               </button>
