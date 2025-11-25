@@ -6,7 +6,7 @@ import MovieDetailPage from './pages/MovieDetailPage';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/MoodFlix">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/emotion-detector" element={<EmotionDetectorPage />} />
