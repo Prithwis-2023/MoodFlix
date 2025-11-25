@@ -1,10 +1,15 @@
 // Shared data: movies and series
+const getImagePath = (img) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return `${base}images/${img}`;
+};
+
 export const movies = [
   { 
     id: 1,
     title: "Dude", 
     rating: 7.2, 
-    poster: "/images/image1.png", 
+    poster: getImagePath("image1.png"), 
     description: "A coming-of-age adventure.",
     runtime: 120,
     release_date: "2023-05-15",
@@ -16,7 +21,7 @@ export const movies = [
     id: 2,
     title: "The Shadow's Edge", 
     rating: 7.7, 
-    poster: "/images/image2.png", 
+    poster: getImagePath("image2.png"), 
     description: "Crime thriller about secrets.",
     runtime: 135,
     release_date: "2023-08-20",
@@ -28,7 +33,7 @@ export const movies = [
     id: 3,
     title: "Jolly LLB 3", 
     rating: 7.1, 
-    poster: "/images/image3.png", 
+    poster: getImagePath("image3.png"), 
     description: "Courtroom drama with heart.",
     runtime: 145,
     release_date: "2024-01-10",
@@ -40,7 +45,7 @@ export const movies = [
     id: 4,
     title: "The Woman in the Line", 
     rating: 7.6, 
-    poster: "/images/image4.png", 
+    poster: getImagePath("image4.png"), 
     description: "Psychological noir.",
     runtime: 128,
     release_date: "2023-11-05",
@@ -55,7 +60,7 @@ export const series = [
     id: 5,
     title: "City Stories", 
     rating: 8.0, 
-    poster: "/images/image5.png", 
+    poster: getImagePath("image5.png"), 
     description: "Interwoven lives across one city.",
     runtime: 45,
     release_date: "2023-09-12",
@@ -67,7 +72,7 @@ export const series = [
     id: 6,
     title: "Night Skies", 
     rating: 8.2, 
-    poster: "/images/image6.png", 
+    poster: getImagePath("image6.png"), 
     description: "Sci-fi suspense under the stars.",
     runtime: 50,
     release_date: "2024-02-28",
@@ -79,7 +84,7 @@ export const series = [
     id: 7,
     title: "Microcosm", 
     rating: 7.6, 
-    poster: "/images/image7.png", 
+    poster: getImagePath("image7.png"), 
     description: "Small mysteries with big consequences.",
     runtime: 42,
     release_date: "2023-07-18",
