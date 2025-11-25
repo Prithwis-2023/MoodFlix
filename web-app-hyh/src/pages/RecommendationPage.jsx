@@ -4,7 +4,108 @@ import RecommendationCard from '../components/RecommendationCard';
 
 
 
-function RecommendationsPage({ recommendations, isLoading, error, onSelectMovie, onRecapture, }) {
+function RecommendationSection({ recommendations, isLoading, error, onSelectMovie }) {
+    return (
+        <>
+            <h2 style={styles.sectionTitle}>
+                <span style={{ marginRight: '10px' }}>★</span>
+                Movie Recommendations
+            </h2>
+
+            {isLoading && (
+                <div style={styles.loaderBox}>
+                    <LoadingSpinner message="Curating movies just for you..." />
+                </div>
+            )}
+
+            {!isLoading && error && (
+                <div style={styles.errorBox}>
+                    <p>{error}</p>
+                </div>
+            )}
+
+            {!isLoading && (
+                <div style={styles.scrollContainer}>
+                    {recommendations && recommendations.length > 0 ? (
+                        recommendations.map((movie) => (
+                            <div
+                                key={movie.id || movie.title}
+                                style={styles.cardWrapper}
+                                onClick={() => onSelectMovie(movie.tmdbId)}
+                            >
+                                <RecommendationCard
+                                    title={movie.title}
+                                    rating={movie.rating}
+                                    posterUrl={movie.posterUrl}
+                                    onClick={() => onSelectMovie(movie.tmdbId)}
+                                />
+                            </div>
+                        ))
+                    ) : (
+                        <div style={{ ...styles.emptyState, minWidth: '300px' }}>
+                            <p style={styles.emptyText}>
+                                No recommendations yet.<br />
+                                Try capturing your emotion!
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
+        </>
+    );
+}
+
+
+function PreviousWatchingSection({ recentWatched, onSelectMovie }) {
+    
+    const moviesToShow = (recentWatched || []).slice(0, 5);
+
+    return (
+        <>
+            <h2 style={styles.sectionTitle}>
+                <span style={{ marginRight: '10px' }}>⏱</span>
+                Previously Watching
+            </h2>
+
+            <div style={styles.scrollContainer}>
+                {moviesToShow.length > 0 ? (
+                    moviesToShow.map((movie) => (
+                        <div
+                            key={movie.id || movie.title}
+                            style={styles.cardWrapper}
+                            onClick={() => onSelectMovie(movie.tmdbId)}
+                        >
+                            <RecommendationCard
+                                title={movie.title}
+                                rating={movie.rating}
+                                posterUrl={movie.posterUrl}
+                                onClick={() => onSelectMovie(movie.tmdbId)}
+                            />
+                        </div>
+                    ))
+                ) : (
+                    <div style={{ ...styles.emptyState, minWidth: '300px' }}>
+                        <p style={styles.emptyText}>
+                            we don'y have Previous Watching Movie..<br />
+                            Add in Movie Detail!!
+                        </p>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+}
+
+
+//entire Page
+function RecommendationsPage({
+    recommendations,
+    recentWatched,           
+    isLoading,
+    error,
+    onSelectMovie,
+    onRecapture,
+}) {
     return (
         <div style={styles.page}>
             {/* Header */}
@@ -19,65 +120,35 @@ function RecommendationsPage({ recommendations, isLoading, error, onSelectMovie,
             <div style={styles.container}>
                 {/* AI Recommendation Button */}
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <GetRecommendationButton onClick={onRecapture}
-                        style={{ width: "200px" } }>
+                    <GetRecommendationButton
+                        onClick={onRecapture}
+                        style={{ width: '200px' }}
+                    >
                         <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>✨</span>
                         Get AI Recommendations
                     </GetRecommendationButton>
                 </div>
 
-                {/* Section Title */}
-                <h2 style={styles.sectionTitle}>
-                    <span style={{ marginRight: '10px' }}>★</span>
-                    Movie Recommendations
-                </h2>
+                {/* section 1: AI recommendation */}
+                <RecommendationSection
+                    recommendations={recommendations}
+                    isLoading={isLoading}
+                    error={error}
+                    onSelectMovie={onSelectMovie}
+                />
 
-                {isLoading && (
-                    <div style={styles.loaderBox}>
-                        <LoadingSpinner message="Curating movies just for you..." />
-                    </div>
-                )}
-
-                {!isLoading && error && (
-                    <div style={styles.errorBox}>
-                        <p>{error}</p>
-                    </div>
-                )}
-
-                {/* Horizontal Scroll Area */}
-                {!isLoading && (
-                    <div style={styles.scrollContainer}>
-                        {recommendations && recommendations.length > 0 ? (
-                            recommendations.map((movie) => (
-                                <div
-                                    key={movie.id || movie.title}
-                                    style={styles.cardWrapper}
-                                    onClick={() => onMovieClick(movie)}
-                                >
-                                    <RecommendationCard
-                                        title={movie.title}
-                                        rating={movie.rating}
-                                        posterUrl={movie.posterUrl}
-                                        onClick={() => onSelectMovie(movie.tmdbId)}
-                                    />
-                                </div>
-                            ))
-                        ) : (
-                            <div style={{ ...styles.emptyState, minWidth: '300px' }}>
-                                <p style={styles.emptyText}>
-                                    No recommendations yet.<br />
-                                    Try capturing your emotion!
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
+                {/* section 2: previous watching */}
+                <PreviousWatchingSection
+                    recentWatched={recentWatched}
+                    onSelectMovie={onSelectMovie}
+                />
             </div>
         </div>
     );
 }
 
-// 스타일 전체
+
+
 const styles = {
     page: {
         minHeight: '100vh',
@@ -115,14 +186,10 @@ const styles = {
         boxSizing: 'border-box',
     },
 
-    buttonWrapper: {
-        textAlign: 'center',
-        marginBottom: '3rem',
-    },
-
     sectionTitle: {
         fontSize: '1.8rem',
         fontWeight: 700,
+        marginTop: '2.5rem',
         marginBottom: '1.5rem',
         paddingBottom: '1rem',
         borderBottom: '3px solid #ff6b6b',

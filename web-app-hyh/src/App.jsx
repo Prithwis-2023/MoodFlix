@@ -15,6 +15,7 @@ function App() {
   const [view, setView] = useState('capture');
   const [recommendations, setRecommendations] = useState([]);
   const [selectedMovieId, setSelectedMovieId] = useState(null);
+  const [recentWatched, setRecentWatched] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -63,6 +64,15 @@ function App() {
       }
     })();
   }, [view]);
+  
+  //handle previous Watching list
+  const handleAddRecentWatched = (movie) => {
+    setRecentWatched((prev) => {
+      const filtered = prev.filter((m) => m.tmdbId !== movie.tmdbId); 
+      const updated = [movie, ...filtered];
+      return updated.slice(0, 5); 
+    });
+  };
 
   //lendering detail page
   if (view === 'detail' && selectedMovieId) {
@@ -70,6 +80,7 @@ function App() {
       <MovieDetailPage
         tmdbId={selectedMovieId}
         onBack={() => setView('recommendations')}
+        onAddRecentWatched={handleAddRecentWatched}
       />
     );
   }
@@ -89,10 +100,10 @@ function App() {
   }
 
   //recommendation page
-
   return (
     <RecommendationsPage
       recommendations={recommendations}
+      recentWatched={recentWatched}
       isLoading={isLoading}
       error={error}
       onRecapture={() => setView('capture')}

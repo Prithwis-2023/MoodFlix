@@ -245,8 +245,9 @@ const styles = {
     main: {
         flex: 1,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
+        marginTop: '72px',
         padding: '2rem',
     },
     container: {
@@ -361,6 +362,7 @@ const styles = {
         transform: 'scaleX(-1)', // Mirror effect (optional, standard for webcams)
         backgroundColor: '#000',
         minHeight: '300px',
+        borderRadius: '12px',
     },
     hint: {
         fontSize: '0.85rem',
