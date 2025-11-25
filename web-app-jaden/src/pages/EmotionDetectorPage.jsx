@@ -189,14 +189,16 @@ function EmotionDetectorPage() {
               <button 
                 className="btn btn-primary btn-lg me-3"
                 onClick={handleCaptureEmotion}
-                disabled={loading || !apiHealthy}
+                disabled={loading}
+                title={!apiHealthy ? "Camera will work, but AI detection requires backend deployment" : ""}
               >
                 <i className="bi bi-camera"></i> Capture Emotion
               </button>
               <button 
                 className="btn btn-success btn-lg"
                 onClick={handleGetRecommendations}
-                disabled={loading || !currentEmotion || !apiHealthy}
+                disabled={loading || !currentEmotion}
+                title={!apiHealthy ? "Requires backend deployment for AI recommendations" : ""}
               >
                 <i className="bi bi-stars"></i> Get Recommendations
               </button>
