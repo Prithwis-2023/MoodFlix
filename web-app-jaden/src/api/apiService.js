@@ -3,7 +3,10 @@
  * Handles all communication with the AI backend and TMDB-like data
  */
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// API URL - change this after deploying backend to Render
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://moodflix-api.onrender.com/api'  // Production: Update with your Render URL
+  : 'http://localhost:5000/api';              // Development: Local server
 
 /**
  * Fetch context: location, weather, day info
