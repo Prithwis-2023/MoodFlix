@@ -3,9 +3,17 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchMovieById, getPosterUrl } from '../api/tmdbApi';
 
 
-function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched }) {
+function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched, isFromPrevious, onRemoveFromRecent, }) {
     const [movie, setMovie] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+
+
+    const handleRemove = () => {
+        if (onRemoveFromRecent) {
+            onRemoveFromRecent(tmdbId);  
+        }
+        onBack();                      
+    };
 
     useEffect(() => {
         (async () => {
@@ -135,6 +143,14 @@ function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched }) {
                             onClick={()=>onAddRecentWatched(movie)}>
                                 Add to Watchlist
                             </button>
+                            {isFromPrevious && (                          
+                                <button
+                                    style={{ ...styles.actionBtn, background: '#555' }}
+                                    onClick={handleRemove}
+                                >
+                                    Remove from Previously Watching
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

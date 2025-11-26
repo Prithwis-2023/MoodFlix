@@ -71,7 +71,7 @@ function PreviousWatchingSection({ recentWatched, onSelectMovie }) {
                 {moviesToShow.length > 0 ? (
                     moviesToShow.map((movie) => (
                         <div
-                            key={movie.id || movie.title}
+                            key={movie.tmdbId}
                             style={styles.cardWrapper}
                             onClick={() => onSelectMovie(movie.tmdbId)}
                         >
@@ -103,7 +103,8 @@ function RecommendationsPage({
     recentWatched,           
     isLoading,
     error,
-    onSelectMovie,
+    onSelectRecommendedMovie,
+    onSelectPreviousMovie,
     onRecapture,
 }) {
     return (
@@ -134,13 +135,13 @@ function RecommendationsPage({
                     recommendations={recommendations}
                     isLoading={isLoading}
                     error={error}
-                    onSelectMovie={onSelectMovie}
+                    onSelectMovie={onSelectRecommendedMovie}
                 />
 
                 {/* section 2: previous watching */}
                 <PreviousWatchingSection
                     recentWatched={recentWatched}
-                    onSelectMovie={onSelectMovie}
+                    onSelectMovie={onSelectPreviousMovie}
                 />
             </div>
         </div>

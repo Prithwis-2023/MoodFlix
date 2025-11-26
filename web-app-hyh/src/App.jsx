@@ -19,6 +19,7 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isFromPrevious, setIsFromPrevious] = useState(false);
 
   //test Data
   useEffect(() => {
@@ -67,11 +68,42 @@ function App() {
   
   //handle previous Watching list
   const handleAddRecentWatched = (movie) => {
+    
+    const tmdbId = movie.tmdbId ?? movie.id;
+
+    const normalized = {
+      tmdbId,
+      title: movie.title,
+      rating:
+        movie.rating ?? 
+        (movie.vote_average != null
+          ? movie.vote_average.toFixed(1)
+          : 'N/A'),
+      posterUrl:
+        movie.posterUrl ?? 
+        getPosterUrl(movie.poster_path),
+    };
+
     setRecentWatched((prev) => {
-      const filtered = prev.filter((m) => m.tmdbId !== movie.tmdbId); 
-      const updated = [movie, ...filtered];
-      return updated.slice(0, 5); 
+      const filtered = prev.filter((m) => m.tmdbId !== normalized.tmdbId);
+      return [normalized, ...filtered].slice(0, 5);
     });
+  };
+
+  const handleSelectRecommendedMovie = (tmdbId) => {
+    setSelectedMovieId(tmdbId);
+    setIsFromPrevious(false);
+    setView('detail');
+  };
+
+  const handleSelectPreviousMovie = (tmdbId) => {
+    setSelectedMovieId(tmdbId);
+    setIsFromPrevious(true);
+    setView('detail');
+  };
+
+  const handleRemoveFromRecent = (tmdbId) => {
+    setRecentWatched((prev) => prev.filter((m) => m.tmdbId !== tmdbId));
   };
 
   //lendering detail page
@@ -81,6 +113,8 @@ function App() {
         tmdbId={selectedMovieId}
         onBack={() => setView('recommendations')}
         onAddRecentWatched={handleAddRecentWatched}
+        isFromPrevious={isFromPrevious}
+        onRemoveFromRecent={handleRemoveFromRecent}
       />
     );
   }
@@ -107,10 +141,8 @@ function App() {
       isLoading={isLoading}
       error={error}
       onRecapture={() => setView('capture')}
-      onSelectMovie={(tmdbId) => {
-        setSelectedMovieId(tmdbId);
-        setView('detail');
-      }}
+      onSelectRecommendedMovie={handleSelectRecommendedMovie}
+      onSelectPreviousMovie={handleSelectPreviousMovie}
     />
   );
   
