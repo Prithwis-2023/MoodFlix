@@ -36,7 +36,7 @@ export const useAudioRecorder = () => {
             console.error('startRecording error:', err);
             setError('cant start recording, check audio authority');
             setIsRecording(false);
-            // 🔥 상위 코드에서 실패를 알 수 있도록 다시 던져줌
+            
             throw err;
         }
     }, []);
@@ -91,9 +91,9 @@ export const useAudioRecorder = () => {
                 reject(err);
             }
         });
-    }, []); // ✅ isRecording 의존성 제거
+    }, []); 
 
-    // 컴포넌트 언마운트 시 스트림 정리
+    
     useEffect(() => {
         return () => {
             if (streamRef.current) {

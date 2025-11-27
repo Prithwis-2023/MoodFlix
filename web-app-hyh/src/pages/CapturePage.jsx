@@ -114,7 +114,7 @@ function CapturePage({ setRecommendations, setView, isLoading, setIsLoading, err
             await startRecording();
 
             //capture frame
-            const frames = await captureFrames(20, 150); // 20, 150ms
+            const frames = await captureFrames(20, 250); // 20, 250ms
 
             // convert to base64
             const audioBase64 = await stopRecording();

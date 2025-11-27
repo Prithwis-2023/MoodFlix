@@ -13,7 +13,7 @@ export const useWebcamCapture = () => {
         try {
             setError(null);
 
-            // 이전 스트림 정리
+            
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach((t) => t.stop());
                 streamRef.current = null;
@@ -63,7 +63,7 @@ export const useWebcamCapture = () => {
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
 
-            // 비디오 사이즈 설정 (fallback)
+            
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
 
@@ -72,7 +72,7 @@ export const useWebcamCapture = () => {
             for (let i = 0; i < numFrames; i++) {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // "data:image/jpeg;base64,..."
-                const base64 = dataUrl.split(',')[1]; // 순수 base64만 추출
+                const base64 = dataUrl.split(',')[1]; //base64
                 frames.push(base64);
 
                 if (i < numFrames - 1) {
@@ -85,7 +85,7 @@ export const useWebcamCapture = () => {
         [isWebcamOn]
     );
 
-    // 언마운트 시 정리
+    
     useEffect(() => {
         return () => {
             if (streamRef.current) {
