@@ -3,7 +3,7 @@ import React from 'react';
 
 const JETSON_IP = "172.19.27.2";
 
-const API_URL = `http://${JETSON_IP}:8080/inference`;
+const API_URL = `http://${JETSON_IP}:2036/inference`;
 
 export async function sendInferenceRequest(payload) {
     console.log("Sending request to AI server...", API_URL);
