@@ -22,9 +22,10 @@ function App() {
   const [error, setError] = useState(null);
   const [isFromPrevious, setIsFromPrevious] = useState(false);
 
-  //test Data
+
+  /*test Data
   useEffect(() => {
-    if (view !== 'recommendations') return;
+    if (view !== '') return;
 
     
     const mockTitles = [
@@ -58,7 +59,7 @@ function App() {
           posterUrl: getPosterUrl(m.poster_path),
         }));
 
-        setRecommendations(formatted);
+        setServerTitless(formatted);
       } catch (e) {
         setError('failed recommedation');
       } finally {
@@ -66,6 +67,7 @@ function App() {
       }
     })();
   }, [view]);
+  */
   
   //handle previous Watching list
   const handleAddRecentWatched = (movie) => {
@@ -123,7 +125,7 @@ function App() {
   //capture page
   if (view === 'capture') {
     return (
-      <CapturePage1
+      <CapturePage
         setRecommendations={setRecommendations}
         setView={setView}
         isLoading={isLoading}

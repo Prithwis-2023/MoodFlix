@@ -5,7 +5,7 @@ import GetRecommendationButton from '../components/GetRecommendationButton';
 
 const SIGNALING_URL = "ws://172.19.27.2:8000/signaling"; 
 
-function CapturePage1({ setRecommendations, setView, isLoading, setIsLoading, error, setError }) {
+function CapturePage1({ setRecommendations, setView,setServerTitles, isLoading, setIsLoading, error, setError }) {
     const videoRef = useRef(null);
     const pcRef = useRef(null);
     const wsRef = useRef(null);
@@ -56,8 +56,11 @@ function CapturePage1({ setRecommendations, setView, isLoading, setIsLoading, er
                         }
 
                         if (data.inference_result) {
-                            console.log('🎬 inference_result:', data.inference_result);
-                            setRecommendations(data.inference_result);
+                            console.log('🎬 inference_result (titles):', data.inference_result);
+
+                            // 서버에서 받은 "제목 배열"을 App으로 올려줌
+                            setServerTitles(data.inference_result);
+
                             setView('recommendations');
                             setIsLoading(false);
                             setStatusMessage('inference done');
@@ -254,7 +257,7 @@ function CapturePage1({ setRecommendations, setView, isLoading, setIsLoading, er
     return (
         <div style={styles.page}>
             <header style={styles.header}>
-                <h1 style={styles.logo}>🎬 Moodflix AI (WebRTC)</h1>
+                <h1 style={styles.logo}>🎬 Moodflix</h1>
             </header>
 
             <main style={styles.main}>
