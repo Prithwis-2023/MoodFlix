@@ -10,6 +10,7 @@ import RecommendationCard from './components/RecommendationCard';
 import GetRecommendationButton from './components/GetRecommendationButton';
 import MovieDetailPage from './pages/MovieDetailPage';
 import RecommendationsPage from './pages/RecommendationPage';
+import CapturePage1 from './pages/CapturePage1';
 
 function App() {
   const [view, setView] = useState('capture');
@@ -122,7 +123,7 @@ function App() {
   //capture page
   if (view === 'capture') {
     return (
-      <CapturePage
+      <CapturePage1
         setRecommendations={setRecommendations}
         setView={setView}
         isLoading={isLoading}
