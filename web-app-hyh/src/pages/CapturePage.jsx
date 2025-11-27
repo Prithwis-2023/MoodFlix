@@ -11,7 +11,12 @@ function CapturePage({ setRecommendations, setView, isLoading, setIsLoading, err
     const { videoRef, isWebcamOn, error: webcamError, startWebcam, stopWebcam, captureFrames } =
         useWebcamCapture();
     const { isRecording, error: audioError, startRecording, stopRecording } = useAudioRecorder();
-    const { city, weather, dayStatus, weekday, temperature } = useEnvironment();
+    const { city,weekday, temperature,
+        weather_desc,
+        today_status,
+        tomorrow_status,
+        lat,
+        lon, } = useEnvironment();
 
     const [statusMessage, setStatusMessage] = useState('');
 
@@ -96,10 +101,13 @@ function CapturePage({ setRecommendations, setView, isLoading, setIsLoading, err
             //eviroment data
             const environment = {
                 city,
-                weather,
-                dayStatus,
+                weather_desc,
+                today_status,
                 weekday,
                 temperature,
+                tomorrow_status,
+                lat,
+                lon,
             };
 
             
