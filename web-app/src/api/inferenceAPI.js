@@ -1,12 +1,16 @@
 import React from 'react';
 
 
-const JETSON_IP = " ";
+const JETSON_IP = "172.19.27.2";
 
-const API_URL = `http://${JETSON_IP}:8080/inference`;
+const API_URL = `http://${JETSON_IP}:8000/inference`;
 
 export async function sendInferenceRequest(payload) {
     console.log("Sending request to AI server...", API_URL);
+
+    console.log("=== [DEBUG] Final Payload Sent to Server ===");
+    console.log(JSON.stringify(payload, null, 2));
+    console.log("================================================");
 
     try {
         const startTime = Date.now();

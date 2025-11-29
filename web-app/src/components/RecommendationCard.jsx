@@ -1,69 +1,70 @@
 import React from 'react';
 
+function RecommendationCard({ posterUrl, title, rating, onClick }) {
 
-
-function RecommendationCard({ posterUrl, title, rating }) {
-
-    // Inline styles based on the provided design image
     const styles = {
-        // The main card container
         card: {
             fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#333652', // Dark card background
-            borderRadius: '12px',       // Rounded corners
+            backgroundColor: '#333652',
+            borderRadius: '12px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            overflow: 'hidden',         // To keep the image corners rounded
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            height: '100%',             // Fill the grid cell
+            height: '100%',
+            cursor: onClick ? 'pointer' : 'default',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
         },
-        // Poster image
+        cardHover: {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
+        },
         posterImage: {
             width: '100%',
-            height: 'auto',             // Maintain aspect ratio
+            height: 'auto',
             display: 'block',
-            // No border-radius here, the image itself seems to have it
         },
-        // Container for text content (title, rating)
         info: {
             padding: '16px',
         },
-        // Movie title
         title: {
-            color: '#FFFFFF',           // White text
+            color: '#FFFFFF',
             fontSize: '1.1em',
             fontWeight: 'bold',
-            margin: '0 0 4px 0',      // Margin bottom 4px
-            whiteSpace: 'nowrap',       // Prevent title from wrapping
+            margin: '0 0 4px 0',
+            whiteSpace: 'nowrap',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',   // Add '...' if title is too long
+            textOverflow: 'ellipsis',
         },
-        // Rating text
         rating: {
-            color: '#B0B0B0',           // Light gray text
+            color: '#B0B0B0',
             fontSize: '0.9em',
             margin: '0',
         }
     };
 
-    /**
-     * Handles image loading errors by replacing the broken image
-     * with a placeholder from placehold.co
-     */
     const handleImageError = (e) => {
-        e.target.onerror = null; // Prevent infinite loop
-        // Placeholder image URL
+        e.target.onerror = null;
         const placeholder = `https://placehold.co/600x900/333652/FFFFFF?text=${encodeURIComponent(title)}`;
         e.target.src = placeholder;
     };
 
     return (
-        <div style={styles.card}>
+        <div
+            style={styles.card}
+            onClick={onClick}
+            onMouseEnter={e => {
+                Object.assign(e.currentTarget.style, styles.cardHover);
+            }}
+            onMouseLeave={e => {
+                e.currentTarget.style.transform = '';
+                e.currentTarget.style.boxShadow = styles.card.boxShadow;
+            }}
+        >
             <img
                 src={posterUrl}
                 alt={`Poster for ${title}`}
                 style={styles.posterImage}
-                // Add an error handler for broken poster links
                 onError={handleImageError}
             />
             <div style={styles.info}>

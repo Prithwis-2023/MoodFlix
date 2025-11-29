@@ -1,133 +1,112 @@
-import { useState, useRef, useCallback, useEffect} from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
-
-
-export const useWebcamCapture = ({ numFrames = 20, frameInterval = 100, deviceId = null }) => {
-
-    // State
-    const [isWebcamOn, setIsWebcamOn] = useState(false);
+export const useAudioRecorder = () => {
+    const [isRecording, setIsRecording] = useState(false);
     const [error, setError] = useState(null);
+    const [audioBlob, setAudioBlob] = useState(null); // for debugging
 
-    // Refs
-    // (Refactor) The hook now creates and returns the videoRef
-    const videoRef = useRef(null);
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
     const streamRef = useRef(null);
-    // Internal canvas for capturing images
-    const canvasRef = useRef(document.createElement('canvas'));
 
-    // (Refactor) Start webcam automatically when the hook is used (on mount)
-    useEffect(() => {
-        async function startWebcam() {
+    const startRecording = useCallback(async () => {
+        try {
             setError(null);
-            try {
-                // 1. Get user media stream
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 }
-                });
-                streamRef.current = stream;
+            setAudioBlob(null);
+            audioChunksRef.current = [];
 
-                // 2. Attach stream to video element
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                    await videoRef.current.play();
-                    setIsWebcamOn(true);
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: false,
+            });
+            streamRef.current = stream;
+
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) {
+                    audioChunksRef.current.push(e.data);
                 }
-            } catch (err) {
-                console.error("Error starting webcam:", err);
-                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                    setError('Webcam access was denied.');
-                } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-                    setError('No webcam was found.');
-                } else {
-                    setError('Failed to start webcam.');
-                }
-                setIsWebcamOn(false);
-            }
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+        } catch (err) {
+            console.error('startRecording error:', err);
+            setError('cant start recording, check audio authority');
+            setIsRecording(false);
+            
+            throw err;
         }
+    }, []);
 
-        startWebcam();
+    const stopRecording = useCallback(() => {
+        return new Promise((resolve, reject) => {
+            try {
+                if (!mediaRecorderRef.current) {
+                    throw new Error('MediaRecorder is not initialized');
+                }
 
-        // 3. Cleanup function: stop stream when component unmounts
+                const mediaRecorder = mediaRecorderRef.current;
+
+                if (mediaRecorder.state !== 'recording') {
+                    throw new Error(`Recorder state is "${mediaRecorder.state}", not "recording"`);
+                }
+
+                mediaRecorder.onstop = async () => {
+                    try {
+                        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                        setAudioBlob(blob);
+
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            const dataUrl = reader.result; // "data:audio/webm;base64,..."
+                            const base64 = dataUrl.split(',')[1];
+                            resolve(base64);
+                        };
+                        reader.onerror = (e) => {
+                            console.error('FileReader error:', e);
+                            reject(new Error('failed audio to base64'));
+                        };
+                        reader.readAsDataURL(blob);
+                    } catch (err) {
+                        reject(err);
+                    } finally {
+                        if (streamRef.current) {
+                            streamRef.current.getTracks().forEach((t) => t.stop());
+                            streamRef.current = null;
+                        }
+                        mediaRecorderRef.current = null;
+                        audioChunksRef.current = [];
+                        setIsRecording(false);
+                    }
+                };
+
+                mediaRecorder.stop();
+            } catch (err) {
+                console.error('stopRecording error:', err);
+                setError(err.message);
+                setIsRecording(false);
+                reject(err);
+            }
+        });
+    }, []); 
+
+    
+    useEffect(() => {
         return () => {
             if (streamRef.current) {
-                streamRef.current.getTracks().forEach(track => track.stop());
+                streamRef.current.getTracks().forEach((t) => t.stop());
             }
         };
-    }, []); // Empty array ensures this runs only once on mount
+    }, []);
 
-    /**
-     * @description Stops the webcam stream and clears the video element.
-     * This is the function App.jsx expects to call.
-     */
-    // (Refactor) Renamed 'stopWebcam' to 'stopCapture' to match App.jsx
-    const stopCapture = useCallback(() => {
-        if (streamRef.current) {
-            // 1. Stop all media tracks
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-        }
-        // 2. Clear the video element
-        if (videoRef.current) {
-            videoRef.current.srcObject = null;
-        }
-        setIsWebcamOn(false);
-    }, []); // No dependencies, refs are stable
-
-    /**
-     * @description Captures a specified number of frames from the webcam.
-     * @returns {Promise<string[]>} A promise that resolves with an array of Base64-encoded image strings.
-     */
-    // (Refactor) Renamed 'captureBase64Image' to 'captureFrames'
-    // Now loops 'numFrames' times
-    const captureFrames = useCallback(async () => {
-        if (!videoRef.current || !canvasRef.current || !isWebcamOn || !videoRef.current.videoWidth) {
-            const errText = "Cannot capture: Webcam not ready or refs not set.";
-            console.warn(errText);
-            setError(errText);
-            throw new Error(errText);
-        }
-
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-
-        // Set canvas dimensions to match video
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const context = canvas.getContext('2d');
-
-        const frames = [];
-
-        for (let i = 0; i < numFrames; i++) {
-            if (!streamRef.current) { // Check if webcam was stopped during capture
-                throw new Error("Webcam stream stopped during capture.");
-            }
-
-            // 1. Draw video frame to canvas
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // 2. Get data URL (as JPEG)
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-
-            // 3. Get only the Base64 part (as in your original code)
-            frames.push(dataUrl.split(',')[1]);
-
-            // 4. Wait for the interval (if not the last frame)
-            if (i < numFrames - 1) {
-                await new Promise(resolve => setTimeout(resolve, frameInterval));
-            }
-        }
-
-        return frames; // Return the array of base64 strings
-
-    }, [isWebcamOn, numFrames, frameInterval]); // Dependencies
-
-
-    // Return the values expected by App.jsx
     return {
-        videoRef,     // (React.Ref) Ref to be attached to the <video> element.
-        isWebcamOn,   // (boolean) Is the webcam currently streaming?
-        error,        // (string | null) Any error message.
-        stopCapture,  // (function) Call to stop the webcam stream.
-        captureFrames // (function) Call to capture frames (returns Promise<string[]>)
+        isRecording,
+        error,
+        audioBlob,
+        startRecording,
+        stopRecording,
     };
-}
+};
