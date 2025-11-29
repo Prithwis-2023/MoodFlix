@@ -5,8 +5,9 @@ Using text, facial expressions, and speech analysis, the system detects the user
 
 ----
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/69442832-059d-4569-b813-549df0cb8a58" width="70%" />
+  <img src="https://github.com/user-attachments/assets/ca564aea-b76d-4afb-80de-395e7a0a1e68" width="70%" />
 </p>
+
 
 ----
 
