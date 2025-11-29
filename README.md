@@ -3,6 +3,13 @@
 MoodFlix is a distributed AI system demonstrating client-server networking, real-time payload exchange, concurrent processing, and multimodal inference over a LAN.
 Using text, facial expressions, and speech analysis, the system detects the user's emotion and recommends a movie tailored to their mood.
 
+----
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/69442832-059d-4569-b813-549df0cb8a58" width="70%" />
+</p>
+
+----
+
 This project showcases core networking concepts including:
 - REST communication over HTTP
 - Structured payload transfer (JSON + Base64 for media)
