@@ -91,7 +91,7 @@ def decode_base64_audio(b64_string, target_sr=16000):
     audio_data, sr = sf.read(audio_file, dtype='float32')
     # if stereo convert to mono
     if len(audio_data.shape) > 1:
-        audo_data = np.mean(audio_data, axis=1)
+        audio_data = np.mean(audio_data, axis=1)
     # resample if needed
     if sr != target_sr:
         audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=target_sr)
