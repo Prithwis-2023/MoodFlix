@@ -204,13 +204,23 @@ Adjust the server IP inside the React codebase:
 
 REACT_APP_SERVER_URL=http://<jetson-ip>:<port>
 
-### 👨‍💻 Contributors
+## 👩‍💻 Contributors
 
-Name                        Role
-Prithwis Das                implementing server-side architecture
-Arslanit                    implementing server-side architecture
-Myint Myat Aung             implementing client-side architecture
-Choi Hyung-chan             implementing client-side architecture
+| Name              | Role                                 |
+|------------------|---------------------------------------|
+| Prithwis Das     | Implementing server-side architecture |
+| Arslanit         | Implementing server-side architecture |
+| Myint Myat Aung  | Implementing client-side architecture |
+| Choi Hyung-chan  | Implementing client-side architecture |
+## 👩‍💻 Contributors
+
+| Name              | Role                                 |
+|------------------|---------------------------------------|
+| Prithwis Das     | Implementing server-side architecture |
+| Arslanit         | Implementing server-side architecture |
+| Myint Myat Aung  | Implementing client-side architecture |
+| Choi Hyung-chan  | Implementing client-side architecture |
+
 
 ### ⭐ Future Enhancements
 - Real-time emotion timeline graph
