@@ -185,13 +185,17 @@ This design demonstrates offloaded computation, ideal for low-power or mobile cl
 - Multimodal Deep Learning Models
 - REST API Server (Flask/FastAPI/Express)
 
-### 🚀 How to Run Locally
+## 🚀 How to Run Locally
+
+---
 
 ### 📌 Client Setup (React)
 
+```bash
 cd client
 npm install
 npm start
+
 
 ### 📌 Server Setup (Jetson)
 
@@ -204,14 +208,6 @@ Adjust the server IP inside the React codebase:
 
 REACT_APP_SERVER_URL=http://<jetson-ip>:<port>
 
-## 👩‍💻 Contributors
-
-| Name              | Role                                 |
-|------------------|---------------------------------------|
-| Prithwis Das     | Implementing server-side architecture |
-| Arslanit         | Implementing server-side architecture |
-| Myint Myat Aung  | Implementing client-side architecture |
-| Choi Hyung-chan  | Implementing client-side architecture |
 ## 👩‍💻 Contributors
 
 | Name              | Role                                 |
