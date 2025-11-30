@@ -34,6 +34,77 @@ The client collects webcam frames, speech audio, and other auxillary data and pa
 
 The Jetson server performs multimodal emotion inference, updates the user’s emotion timeline, and returns a series of recommended movies.
 
+
+                                CLIENT SIDE
+                                ┌─────────────────────────┐
+                                │      Web Application     │
+                                │  (Browser: React Client) │
+                                └───────────────┬──────────┘
+                                                │
+                      ┌─────────────────────────┼───────────────────────────┐
+                      │                         │                           │
+        ┌─────────────▼──────────────┐  ┌───────▼──────────────┐  ┌────────▼─────────────┐
+        │ Collect Environment Data    │  │ Capture Webcam Frame │  │  Record Audio Snippet │
+        │   - Location (API)          │  │   (Base64 Image)     │  │   (Base64 Audio)      │
+        │   - Weather (API)           │  └──────────────────────┘  └───────────────────────┘
+        └─────────────┬──────────────┘
+                      │
+                      ▼
+        ┌──────────────────────────────────────┐
+        │ Assemble JSON Payload                │
+        │  { environment, image, audio }       │
+        └─────────────┬────────────────────────┘
+                      │
+                      ▼
+           CLIENT → SERVER (HTTP POST)
+
+                      ▼
+        ┌────────────────────────────────────────┐
+        │           Jetson Server A              │
+        │       (API Gateway / Preprocessing)    │
+        └─────────────┬──────────────────────────┘
+                      │
+                      ▼
+        ┌────────────────────────────────────────┐
+        │  Decode Payload (JSON + Base64)         │
+        │  Run Local ML Models:                   │
+        │    - Facial Expression Model            │
+        │    - Audio Emotion Model                │
+        └─────────────┬──────────────────────────┘
+                      │
+                      │  SERVER A → SERVER B (REST / HTTP)
+                      ▼
+        ┌───────────────────────────────────────────┐
+        │      Recommendation Engine Server B        │
+        │        - Context Fusion (Env + Face + Audio)  
+        │        - Mood Classification
+        │        - Generate Movie IDs
+        └───────────────────┬────────────────────────┘
+                            │
+                            │ SERVER B → SERVER A (JSON RETURN)
+                            ▼
+        ┌───────────────────────────────────────────┐
+        │         Server A Response Builder          │
+        │   Packages { mood, movie_ids } → JSON      │
+        └───────────────────┬────────────────────────┘
+                            │
+                            │ SERVER → CLIENT (HTTP JSON Response)
+
+                            ▼
+                   ┌───────────────────────────────┐
+                   │ Client Receives Recommendations│
+                   └───────────────────┬────────────┘
+                                       │
+                                       ▼
+                     ┌────────────────────────────────────┐
+                     │ Query TMDB API for Movie Metadata  │
+                     └───────────────────┬────────────────┘
+                                       ▼
+                     ┌────────────────────────────────────┐
+                     │  Render Personalized Movie UI       │
+                     └────────────────────────────────────┘
+
+
 ### 🏗 Client Architecture
 The client is a React-based web application designed to collect multimodal data and visualize recommendations. Key implementation details include:
 
@@ -70,8 +141,6 @@ The client is a React-based web application designed to collect multimodal data 
   - Finally, the application renders a rich, interactive UI displaying the personalized movie suggestions.
 
 
-
-
 ### ✉ Payload Format (Networking Spec)
 
 When the client sends data, the HTTP request body follows this structure: 
@@ -88,3 +157,73 @@ When the client sends data, the HTTP request body follows this structure:
   "audio": "<base64-encoded-waveform>"
 }
 ```
+### 🧠 Server-Side Architecture (NVIDIA Jetson + Ollama)
+
+The Jetson server is responsible for:
+- Accepting HTTP POST requests
+- Running multimodal inference models (CV, NLP, Audio)
+- Updating user emotion history
+- Generating movie recommendations
+- Returning structured JSON responses
+
+This design demonstrates offloaded computation, ideal for low-power or mobile client devices.
+
+### ⚙️ Tech Stack
+
+### Client
+- React.js
+- TMDB API
+- BigDataCloud API
+- Open-Meteo API
+- WebRTC/ Media Capture API
+- Custom Hooks for webcam & microphone handling
+
+### Server
+- Python / Node
+- Ollama LLM backend
+- NVIDIA Jetson hardware
+- Multimodal Deep Learning Models
+- REST API Server (Flask/FastAPI/Express)
+
+## 🚀 How to Run Locally
+
+---
+
+### 📌 Client Setup (React)
+
+```bash
+cd client
+npm install
+npm start
+
+### 📌 Server Setup (Jetson)
+
+cd server
+pip install -r requirements.txt
+python server.py
+
+Make sure Jetson and client machine are on the same LAN.
+Adjust the server IP inside the React codebase:
+
+REACT_APP_SERVER_URL=http://<jetson-ip>:<port>
+
+## 👩‍💻 Contributors
+
+| Name              | Role                                 |
+|------------------|---------------------------------------|
+| Prithwis Das     | Implementing server-side architecture |
+| Arslanit         | Implementing server-side architecture |
+| Myint Myat Aung  | Implementing client-side architecture |
+| Choi Hyung-chan  | Implementing client-side architecture |
+
+
+### ⭐ Future Enhancements
+- Real-time emotion timeline graph
+- Long-term preference learning
+- Background noise filtering for better audion inference
+- Server load balancing (multi-client)
+- Websocket live streaming
+
+### 📄 License
+MIT License - free to use, modify, and distribute.
+
