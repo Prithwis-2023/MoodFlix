@@ -157,7 +157,7 @@ When the client sends data, the HTTP request body follows this structure:
   "audio": "<base64-encoded-waveform>"
 }
 ```
-🧠 Server-Side Architecture (NVIDIA Jetson + Ollama)
+🧠 ### Server-Side Architecture (NVIDIA Jetson + Ollama)
 
 The Jetson server is responsible for:
 - Accepting HTTP POST requests
@@ -168,9 +168,9 @@ The Jetson server is responsible for:
 
 This design demonstrates offloaded computation, ideal for low-power or mobile client devices.
 
-⚙️ Tech Stack
+⚙️ ### Tech Stack
 
-Client
+### Client
 - React.js
 - TMDB API
 - BigDataCloud API
@@ -178,22 +178,22 @@ Client
 - WebRTC/ Media Capture API
 - Custom Hooks for webcam & microphone handling
 
-Server
+#### Server
 - Python / Node
 - Ollama LLM backend
 - NVIDIA Jetson hardware
 - Multimodal Deep Learning Models
 - REST API Server (Flask/FastAPI/Express)
 
-🚀 How to Run Locally
+🚀 ### How to Run Locally
 
-📌 Client Setup (React)
+📌 ### Client Setup (React)
 
 cd client
 npm install
 npm start
 
-📌 Server Setup (Jetson)
+📌 ### Server Setup (Jetson)
 
 cd server
 pip install -r requirements.txt
@@ -204,7 +204,7 @@ Adjust the server IP inside the React codebase:
 
 REACT_APP_SERVER_URL=http://<jetson-ip>:<port>
 
-👨‍💻 Contributors
+👨‍💻 ### Contributors
 
 Name                        Role
 Prithwis Das                implementing server-side architecture
@@ -212,13 +212,13 @@ Arslanit                    implementing server-side architecture
 Myint Myat Aung             implementing client-side architecture
 Choi Hyung-chan             implementing client-side architecture
 
-⭐ Future Enhancements
+⭐ ### Future Enhancements
 - Real-time emotion timeline graph
 - Long-term preference learning
 - Background noise filtering for better audion inference
 - Server load balancing (multi-client)
 - Websocket live streaming
 
-📄License
+📄### License
 MIT License - free to use, modify, and distribute.
 
