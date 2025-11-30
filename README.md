@@ -191,10 +191,10 @@ This design demonstrates offloaded computation, ideal for low-power or mobile cl
 
 ### 📌 Client Setup (React)
 
+```bash
 cd client
 npm install
 npm start
-
 
 ### 📌 Server Setup (Jetson)
 
