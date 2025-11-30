@@ -1,6 +1,8 @@
 #!/usr/bin/env/python3
 import cv2
 import os
+import io
+import base64
 import numpy as np
 import csv
 import pandas as pd
@@ -9,9 +11,124 @@ import subprocess
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 import re
+from collections import defaultdict
+from deepface import DeepFace
+import soundfile as sf
+import librosa
 
 user_data = "user_logs.csv"
 OLLAMA_MODEL = "tinyllama"
+
+
+CONFIDENCE_THRESHOLD = 0.50
+NUM_FRAMES = 10
+emotion_history_with_confidence = []
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+def preprocess_frame(frame):
+	lab = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+	l, a, b = cv2.split(lab)
+	clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+	l = clahe.apply(l)
+	enhanced = cv2.merge([l, a, b])
+	return cv2.cvtColor(enhanced, cv2.COLOR_LAB2BGR)
+
+def decode_base64_frame(b64_string):
+	img_data = base64.b64decode(b64_string)
+	np_arr = np.frombuffer(img_data, np.uint8)
+	frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+	return frame
+
+def facial_inference(image_array):
+	for i, b64_frame in enumerate(image_array):
+		frame = decode_base64_frame(b64_frame)
+		if frame is None:
+			print(f"Skipping frame {i+1}: cannot decode")
+			continue
+
+		enhanced_frame = preprocess_frame(frame)
+		gray = cv2.cvtColor(enhanced_frame, cv2.COLOR_BGR2GRAY)
+		faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=7, minSize=(60, 60))
+
+		for (x, y, w, h) in faces:
+			try:
+				result = DeepFace.analyze(
+					enhanced_frame, actions=['emotion'], enforce_detection=False,
+					detector_backend='opencv', silent=True
+				)
+				dominant = result[0]['dominant_emotion']
+				conf = result[0]['emotion'][dominant] / 100.0
+
+				if conf >= CONFIDENCE_THRESHOLD:
+					emotion_history_with_confidence.append((dominant, conf))
+				print(f"[Frame] → {dominant}")
+
+			except Exception as e:
+				print(f"[Error]: {e}")		
+
+		time.sleep(0.2)			
+
+def get_weighted_smoothed_emotion(frames_array, emotion_history_with_confidence):
+    """
+    emotion_history_with_confidence: list of tuples [(emotion, confidence), ...]
+    Returns: the weighted dominant emotion
+    """
+    facial_inference(frames_array)
+
+    if not emotion_history_with_confidence:
+        return "neutral"
+    weighted_scores = defaultdict(float)
+    for emotion, conf in emotion_history_with_confidence:
+        weighted_scores[emotion] += conf  # add confidence as weight
+    # picking the emotion with highest total confidence
+    dominant = max(weighted_scores, key=weighted_scores.get)
+    return dominant
+   
+def decode_base64_audio(b64_string, target_sr=16000):
+    audio_bytes = base64.b64decode(b64_string)
+    audio_file = io.BytesIO(audio_bytes)
+    audio_data, sr = sf.read(audio_file, dtype='float32')
+    # if stereo convert to mono
+    if len(audio_data.shape) > 1:
+        audo_data = np.mean(audio_data, axis=1)
+    # resample if needed
+    if sr != target_sr:
+        audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=target_sr)
+    return audio_data, target_sr 
+
+def extract_audio_features(audio_data, sr=16000):
+    audio_data = audio_data.astype(np.float32)
+    audio_data = audio_data / (np.max(np.abs(audio_data)) + 1e-6) # normalize
+    
+    # RMS energy
+    rms = np.mean(librosa.feature.rms(y=audio_data))
+
+    # Pitch
+    pitches, magnitude = librosa.piptrack(y=audio_data, sr=sr)
+    pitch = np.mean(pitches[pitches>0]) if np.any(pitches>0) else 0
+
+    # Zero crossing rate
+    zcr = np.mean(librosa.feature.zero_crossing_rate(y=audio_data))
+
+    # Spectral centroid
+    spec_centroid = np.mean(librosa.feature.spectral_centroid(y=audio_data, sr=sr))
+
+    return rms, pitch, zcr, spec_centroid
+
+
+def estimate_voice_emotion(audio_data, sr=16000):
+    rms, pitch, zcr, spec_centroid = extract_audio_features(audio_data, sr)
+    # Rules (tuned for Jetson mic)
+    if rms > 0.02 and pitch > 120 and zcr > 0.02:
+        voice_tone = "happy"
+    elif rms < 0.01 and pitch < 100 and zcr < 0.01:
+        voice_tone = "sad"
+    else:
+        voice_tone = "neutral"
+
+    return voice_tone
+
 
 def ask_ollama(prompt_text):
     """Call Ollama CLI to get movie recommendations"""
@@ -87,16 +204,18 @@ def train_on_user_data(csv_file):
 
 
 def ollama_inference(payload):
-	city = payload["city"]
-	lat = payload["lat"]
-	lon = payload["lon"]
-	today_status = payload["today_status"]
-	tomorrow_status = payload["tomorrow_status"]
-	week_day = payload["weekday"]
-	weather_desc = payload["weather_desc"]
-	temperature = payload["temperature"]
-	mood = payload["mood"]
-	voice_tone = payload["voice_tone"]
+	city = payload["environment"]["city"]
+	lat = payload["environment"]["lat"]
+	lon = payload["environment"]["lon"]
+	today_status = payload["environment"]["today_status"]
+	tomorrow_status = payload["environment"]["tomorrow_status"]
+	week_day = payload["environment"]["weekday"]
+	weather_desc = payload["environment"]["weather_desc"]
+	temperature = payload["environment"]["temperature"]
+	#mood = payload["mood"]
+	mood = str(get_weighted_smoothed_emotion(payload['images'], emotion_history_with_confidence))
+	audio_data, sr = decode_base64_audio(payload['audio'])
+	voice_tone = estimate_voice_emotion(audio_data, sr)
 
 	prompt = f"""
 	You are a movie recommendation assistant. The user context is:
@@ -120,17 +239,19 @@ def combined_recommendations(primary_movies, clf_tuple, user_context):
 
 	le_city, le_today, le_tomorrow, le_weather, le_mood, le_tone, le_movie = encoders
 
+	audio_data, sr = decode_base64_audio(user_context['audio'])
+
 	df = pd.DataFrame([{
-		'latitude': user_context['lat'],
-		'longitude': user_context['lon'],
-                'temperature': user_context['temperature'],
-		'city':safe_transform(le_city, user_context['city']),
-		'today_status':safe_transform(le_today, user_context['today_status']),
-		'tomorrow_status':safe_transform(le_tomorrow, user_context['tomorrow_status']),
+		'latitude': user_context['environment']['lat'],
+		'longitude': user_context['environment']['lon'],
+        'temperature': user_context['environment']['temperature'],
+		'city':safe_transform(le_city, user_context['environment']['city']),
+		'today_status':safe_transform(le_today, user_context['environment']['today_status']),
+		'tomorrow_status':safe_transform(le_tomorrow, user_context['environment']['tomorrow_status']),
 		#'weekday':le_weekday.transform([user_context['weekday']])[0],
-		'weather_desc':safe_transform(le_weather, user_context['weather_desc']),
-		'mood':le_mood.transform([user_context['mood']])[0],
-		'tone': le_tone.transform([user_context['voice_tone']])[0]
+		'weather_desc':safe_transform(le_weather, user_context['environment']['weather_desc']),
+		'mood':le_mood.transform([get_weighted_smoothed_emotion(user_context['images'], emotion_history_with_confidence)])[0],
+		'tone': le_tone.transform([estimate_voice_emotion(audio_data, sr)])[0]
 	}])
 	pred_probs = clf.predict_proba(df)[0]
 	top_indices = pred_probs.argsort()[::-1]

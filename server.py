@@ -4,22 +4,33 @@ import json
 import os
 import time
 import socket
-from aiengine import train_on_user_data, ollama_inference, combined_recommendations
+from aiengine import train_on_user_data, ollama_inference, combined_recommendations, emotion_history_with_confidence
 
 HOST = "0.0.0.0" 
-PORT = 8080
+PORT = 8000
 IDLE_TIMEOUT = 60
 
 clf_tuple = train_on_user_data("user_logs.csv")
 
 class JetsonHandler(BaseHTTPRequestHandler):
+
 	def _send_json(self, code, obj):
 		self.send_response(code)
 		self.send_header("Content-type", "application/json")
+		self.send_header("Access-Control-Allow-Origin", "*")
 		self.end_headers()
 		self.wfile.write(json.dumps(obj).encode())
+
+	def do_OPTIONS(self):
+		self.send_response(200, "OK")
+		self.send_header("Access-Control-Allow-Origin", "*")
+		self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		self.send_header("Access-Control-Allow-Headers", "Content-Type")
+		self.end_headers()
+
 	def do_POST(self):
 		if self.path == "/inference":
+			emotion_history_with_confidence.clear()  # clearing per request
 			content_len = int(self.headers.get("Content-Length", 0))
 			raw_body = self.rfile.read(content_len)
 			
