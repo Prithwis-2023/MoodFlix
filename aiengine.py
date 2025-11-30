@@ -88,9 +88,21 @@ def get_weighted_smoothed_emotion(frames_array, emotion_history_with_confidence)
 def decode_base64_audio(b64_string, target_sr=16000):
     audio_bytes = base64.b64decode(b64_string)
     audio_file = io.BytesIO(audio_bytes)
-    audio_data, sr = sf.read(audio_file, dtype='float32')
-    # if stereo convert to mono
-    if len(audio_data.shape) > 1:
+    
+    try:
+        audio_data, sr = sf.read(audio_file, dtype='float32')
+        print("Decoded audio using soundfile")
+    except Exception:
+        try:
+            audio_data = np.frombuffer(audio_bytes, dtype=np.float32)
+            sr = target_sr
+            print("Decoded raw PCM audio")
+        except Exception as e:
+            print("Failed to decode completely!", e)
+            return np.zeros(target_sr), target_sr
+
+   # if stereo convert to mono
+    if audio_data.ndim > 1:
         audio_data = np.mean(audio_data, axis=1)
     # resample if needed
     if sr != target_sr:
