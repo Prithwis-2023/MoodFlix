@@ -14,16 +14,16 @@ function GetRecommendationButton({ onClick, disabled, children }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '12px',               // 아이콘과 텍스트 사이 간격
+            gap: '12px',               
 
             // Font Styles
             fontSize: '1.1rem',
             fontWeight: 'bold',
-            color: 'white',            // 흰색 글씨
+            color: 'white',            
             letterSpacing: '0.5px',
 
             // Appearance
-            backgroundColor: '#FF4A6F', // 요청하신 핑크색 유지
+            backgroundColor: '#FF4A6F', 
             border: 'none',
             borderRadius: '12px',
 

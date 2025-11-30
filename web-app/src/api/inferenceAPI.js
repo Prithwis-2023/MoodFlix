@@ -4,6 +4,7 @@ import React from 'react';
 const JETSON_IP = "172.19.27.2";
 
 const API_URL = `http://${JETSON_IP}:8000/inference`;
+const LOG_API_URL = `http://${JETSON_IP}:8000/inference/log`;
 
 export async function sendInferenceRequest(payload) {
     console.log("Sending request to AI server...", API_URL);
@@ -50,3 +51,70 @@ export async function sendInferenceRequest(payload) {
         return null; 
     }
 }
+
+export async function sendInferenceLog({clientSentAt,env,movieTitle}) {
+
+    console.log("Sending inference log to server...", LOG_API_URL);
+    const logPayload = {
+        clientSentAt,
+        env,
+        movieTitle,
+    };
+    console.log("=== [DEBUG] Log Payload Sent to Server ===");
+    console.log(JSON.stringify(logPayload, null, 2));
+    console.log("==========================================");
+
+    try {
+        const response = await fetch(LOG_API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            body: JSON.stringify(logPayload),
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => response.text());
+            console.error(`Log server error (${response.status}):`, errorBody);
+            throw new Error(`Log server returned ${response.status}`);
+        }
+
+        const result = await response.json().catch(() => null);
+        console.log("Log saved successfully:", result);
+        return result;
+
+    } catch (error) {
+        console.error("Error sending inference log:", error);
+        return null;
+    }
+}
+
+export async function fetchInferenceLogs(limit = 50) {
+    console.log("Fetching inference logs from server...", LOGS_URL);
+
+    try {
+        const response = await fetch(`${LOGS_URL}?limit=${limit}`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => response.text());
+            console.error(`Log fetch error (${response.status}):`, errorBody);
+            throw new Error(`Log fetch returned ${response.status}`);
+        }
+
+        const logs = await response.json();
+        console.log("Logs fetched:", logs);
+        return logs;
+
+    } catch (error) {
+        console.error("Error fetching inference logs:", error);
+        return null;
+    }
+}
+
+ 

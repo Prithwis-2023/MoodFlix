@@ -64,7 +64,7 @@ function PreviousWatchingSection({ recentWatched, onSelectMovie }) {
         <>
             <h2 style={styles.sectionTitle}>
                 <span style={{ marginRight: '10px' }}>⏱</span>
-                Previously Watching
+                Watched List
             </h2>
 
             <div style={styles.scrollContainer}>

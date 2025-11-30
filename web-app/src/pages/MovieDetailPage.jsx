@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchMovieById, getPosterUrl } from '../api/tmdbApi';
-
+import { sendInferenceLog } from '../api/inferenceAPI'; 
 
 function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched, isFromPrevious, onRemoveFromRecent, }) {
     const [movie, setMovie] = useState(null);
@@ -27,6 +27,10 @@ function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched, isFromPrevious, o
             }
         })();
     }, [tmdbId]);
+    
+
+    
+
 
     if (isLoading) {
         return (
@@ -72,7 +76,7 @@ function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched, isFromPrevious, o
 
     
     
-    const handleAddToWatchlist = () => {
+    const handleAddToWatchlist = async () => {
         if (!onAddRecentWatched) return;
 
         
@@ -82,8 +86,27 @@ function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched, isFromPrevious, o
             rating: movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A',
             posterUrl,                   
         };
-
         onAddRecentWatched(recentMovie);
+
+        const clientSentAt = new Date().toISOString();
+        const env = null;  
+
+        try {
+            const result = await sendInferenceLog({
+                clientSentAt,
+                env,
+                movieTitle: movie.title,
+            });
+
+            console.log(`[Server Log] Log sent successfully for '${movie.title}'`);
+            console.log("[Server Log] Response:", result);
+
+        } catch (err) {
+            console.error(`[Server Log] Failed to send log for '${movie.title}':`, err);
+        }
+
+        
+
     };
     return (
         <div style={styles.page}>
@@ -140,7 +163,7 @@ function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched, isFromPrevious, o
                         
                         <div style={{ marginTop: '2rem' }}>
                             <button style={styles.actionBtn}
-                            onClick={()=>onAddRecentWatched(movie)}>
+                                onClick={handleAddToWatchlist}>
                                 Add to Watchlist
                             </button>
                             {isFromPrevious && (                          
