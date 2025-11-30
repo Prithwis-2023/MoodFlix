@@ -195,12 +195,15 @@ This design demonstrates offloaded computation, ideal for low-power or mobile cl
 cd client
 npm install
 npm start
+```
 
 ### 📌 Server Setup (Jetson)
 
+```bash
 cd server
 pip install -r requirements.txt
 python server.py
+```
 
 Make sure Jetson and client machine are on the same LAN.
 Adjust the server IP inside the React codebase:
