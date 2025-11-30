@@ -1,79 +1,120 @@
-function LoadingSpinner({ message = "AI recommending..." }) {
+import React from 'react';
 
-    // Inline styles for layout
-    const styles = {
-        spinnerContainer: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '40px',
-            fontFamily: 'Arial, sans-serif',
-            color: '#333',
-        },
-        svgSpinner: {
-            margin: '20px',
-        },
-        loadingText: {
-            fontSize: '1.2em',
-            fontWeight: 'bold',
-            color: '#007bff', // A pleasant blue
-        }
-    };
+function LoadingSpinner({ message = "Analyzing your mood..." }) {
 
     return (
-        <div style={styles.spinnerContainer}>
-            {/* This is an inline SVG spinner.
-              It creates a "ripple" effect by animating the radius (r)
-              and opacity (stroke-opacity) of two overlapping circles.
-            */}
-            <svg
-                width="80"
-                height="80"
-                viewBox="0 0 44 44"
-                xmlns="http://www.w3.org/2000/svg"
-                stroke="#007bff" // Spinner color
-                style={styles.svgSpinner}
-            >
-                <g fill="none" fillRule="evenodd" strokeWidth="2">
-                    <circle cx="22" cy="22" r="1">
-                        {/* Animation for the first circle */}
-                        <animate attributeName="r"
-                            begin="0s" dur="1.8s"
-                            values="1; 20"
-                            calcMode="spline"
-                            keyTimes="0; 1"
-                            keySplines="0.165, 0.84, 0.44, 1"
-                            repeatCount="indefinite" />
-                        <animate attributeName="stroke-opacity"
-                            begin="0s" dur="1.8s"
-                            values="1; 0"
-                            calcMode="spline"
-                            keyTimes="0; 1"
-                            keySplines="0.3, 0.61, 0.355, 1"
-                            repeatCount="indefinite" />
-                    </circle>
-                    <circle cx="22" cy="22" r="1">
-                        {/* Animation for the second circle, starting 0.9s later */}
-                        <animate attributeName="r"
-                            begin="-0.9s" dur="1.8s"
-                            values="1; 20"
-                            calcMode="spline"
-                            keyTimes="0; 1"
-                            keySplines="0.165, 0.84, 0.44, 1"
-                            repeatCount="indefinite" />
-                        <animate attributeName="stroke-opacity"
-                            begin="-0.9s" dur="1.8s"
-                            values="1; 0"
-                            calcMode="spline"
-                            keyTimes="0; 1"
-                            keySplines="0.3, 0.61, 0.355, 1"
-                            repeatCount="indefinite" />
-                    </circle>
-                </g>
-            </svg>
+        <div className="mf-loading-container">
+            <div className="mf-logo-wrapper">
+                <div className="mf-logo-m">M</div>
+                <div className="mf-light-bar" />
+            </div>
+            <p className="mf-loading-text">{message}</p>
 
-            <p style={styles.loadingText}>{message}</p>
+            <style>
+                {`
+      /* container*/
+      .mf-loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 40px;
+      }
+
+      /* logo */
+      .mf-logo-wrapper {
+        position: relative;
+        width: 80px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      /* ✔ Moodflix M logo*/
+      .mf-logo-m {
+        font-size: 96px;
+        font-weight: 900;
+        font-family: Arial, sans-serif;
+        color: #FF4A6F; /* Moodflix 시그니처 핑크 */
+        text-shadow:
+          0 0 12px rgba(255, 74, 111, 0.8),
+          0 0 24px rgba(255, 74, 111, 0.6),
+          0 0 40px rgba(255, 74, 111, 0.4);
+        animation: mfPulse 1.4s infinite ease-in-out;
+      }
+
+      /* lighy effect */
+      .mf-light-bar {
+        position: absolute;
+        top: -10%;
+        left: -60%;
+        width: 40%;
+        height: 120%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.9) 50%,
+          transparent 100%
+        );
+        filter: blur(2px);
+        transform: skewX(-15deg);
+        opacity: 0.9;
+        animation: mfLightSweep 1.6s infinite;
+      }
+
+      /* text */
+      .mf-loading-text {
+        color: #ffffff;
+        font-size: 1.05em;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+      }
+
+      /* pulse*/
+      @keyframes mfPulse {
+        0% {
+          transform: scale(1);
+          text-shadow:
+            0 0 8px rgba(255, 74, 111, 0.7),
+            0 0 20px rgba(255, 74, 111, 0.4);
+        }
+        50% {
+          transform: scale(1.04);
+          text-shadow:
+            0 0 16px rgba(255, 74, 111, 1),
+            0 0 32px rgba(255, 74, 111, 0.8),
+            0 0 52px rgba(255, 74, 111, 0.6);
+        }
+        100% {
+          transform: scale(1);
+          text-shadow:
+            0 0 8px rgba(255, 74, 111, 0.7),
+            0 0 20px rgba(255, 74, 111, 0.4);
+        }
+      }
+
+      /* ✨ sweeping light bar */
+      @keyframes mfLightSweep {
+        0% {
+          transform: translateX(0) skewX(-15deg);
+          opacity: 0;
+        }
+        20% {
+          opacity: 0.9;
+        }
+        60% {
+          opacity: 0.9;
+        }
+        100% {
+          transform: translateX(220%) skewX(-15deg);
+          opacity: 0;
+        }
+      }
+        `}
+            </style>
         </div>
     );
 }

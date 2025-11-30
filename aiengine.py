@@ -15,6 +15,7 @@ from collections import defaultdict
 from deepface import DeepFace
 import soundfile as sf
 import librosa
+from pydub import AudioSegment
 
 user_data = "user_logs.csv"
 OLLAMA_MODEL = "tinyllama"
@@ -86,16 +87,34 @@ def get_weighted_smoothed_emotion(frames_array, emotion_history_with_confidence)
     return dominant
    
 def decode_base64_audio(b64_string, target_sr=16000):
-    audio_bytes = base64.b64decode(b64_string)
-    audio_file = io.BytesIO(audio_bytes)
-    audio_data, sr = sf.read(audio_file, dtype='float32')
-    # if stereo convert to mono
-    if len(audio_data.shape) > 1:
-        audio_data = np.mean(audio_data, axis=1)
-    # resample if needed
-    if sr != target_sr:
-        audio_data = librosa.resample(audio_data, orig_sr=sr, target_sr=target_sr)
-    return audio_data, target_sr 
+    try:
+        if ',' in b64_string:
+            b64_string = b64_string.split(',')[1]
+        audio_bytes = base64.b64decode(b64_string)
+
+        
+        audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes))
+
+        
+        audio_segment = audio_segment.set_frame_rate(target_sr).set_channels(1)
+
+        
+        samples = np.array(audio_segment.get_array_of_samples())
+
+        
+        if audio_segment.sample_width == 2:
+            audio_data = samples.astype(np.float32) / 32768.0
+        elif audio_segment.sample_width == 4: 
+            audio_data = samples.astype(np.float32) / 2147483648.0
+        else:
+            audio_data = samples.astype(np.float32)
+
+        return audio_data, target_sr
+    
+    except Exception as e:
+        print(f"❌ Audio Decoding Error: {e}")
+       
+        return None, target_sr
 
 def extract_audio_features(audio_data, sr=16000):
     audio_data = audio_data.astype(np.float32)
