@@ -217,7 +217,7 @@ REACT_APP_SERVER_URL=http://<jetson-ip>:<port>
 | Prithwis Das     | Implementing server-side architecture |
 | Arslanit         | Implementing server-side architecture |
 | Myint Myat Aung  | Implementing client-side architecture |
-| Choi Hyung-chan  | Implementing client-side architecture |
+| Choi Hyung Chan  | Implementing client-side architecture |
 
 
 ### ⭐ Future Enhancements
