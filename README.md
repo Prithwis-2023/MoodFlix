@@ -36,17 +36,17 @@ The Jetson server performs multimodal emotion inference, updates the user’s em
 
 
                                 CLIENT SIDE
-                                ┌─────────────────────────┐
+                                ┌─────────────────────────-┐
                                 │      Web Application     │
                                 │  (Browser: React Client) │
                                 └───────────────┬──────────┘
                                                 │
-                      ┌─────────────────────────┼───────────────────────────┐
-                      │                         │                           │
-        ┌─────────────▼──────────────┐  ┌───────▼──────────────┐  ┌────────▼─────────────┐
-        │ Collect Environment Data    │  │ Capture Webcam Frame │  │  Record Audio Snippet │
-        │   - Location (API)          │  │   (Base64 Image)     │  │   (Base64 Audio)      │
-        │   - Weather (API)           │  └──────────────────────┘  └───────────────────────┘
+                      ┌─────────────────────────┼──────────────────────────┐
+                      │                         │                          │
+        ┌─────────────▼──────────────┐  ┌───────▼──────────────┐  ┌────────▼─────────────-┐
+        │ Collect Environment Data   │  │ Capture Webcam Frame │  │  Record Audio Snippet │
+        │   - Location (API)         │  │   (Base64 Image)     │  │   (Base64 Audio)      │
+        │   - Weather (API)          │  └──────────────────────┘  └───────────────────────┘
         └─────────────┬──────────────┘
                       │
                       ▼
