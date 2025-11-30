@@ -17,24 +17,18 @@ function App() {
   const [recommendations, setRecommendations] = useState([]);
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [recentWatched, setRecentWatched] = useState([]);
+  const [serverTitles, setServerTitles] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isFromPrevious, setIsFromPrevious] = useState(false);
 
 
-  /*test Data
   useEffect(() => {
-    if (view !== '') return;
+    // 제목 리스트가 비어있으면 아무 것도 안 함
+    if (!serverTitles || serverTitles.length === 0) return;
 
-    
-    const mockTitles = [
-      "interstellar", 
-      "joker", 
-      "Bridget Jones: Mad About the Boy", 
-      "The Dark Knight", 
-      "The Shawshank Redemption"
-    ];
+    let canceled = false;
 
     (async () => {
       try {
@@ -43,31 +37,49 @@ function App() {
 
         const movies = [];
 
-        
-        for (const title of mockTitles){
-          const results = await searchMovieByTitle(title);
-          if(results.length>0){
-            movies.push(results[0]);
+        // 각 title에 대해 TMDB 검색
+        for (const title of serverTitles) {
+          try {
+            const results = await searchMovieByTitle(title);
+            if (results && results.length > 0) {
+              movies.push(results[0]); // 일단 1순위 결과만 사용
+            } else {
+              console.warn('no TMDB result for title:', title);
+            }
+          } catch (err) {
+            console.error('TMDB search error for title:', title, err);
           }
         }
 
-        const formatted = movies.map(m => ({
+        // TMDB raw 결과 → RecommendationPage용 객체 배열로 변환
+        const formatted = movies.map((m) => ({
           id: m.id,
           tmdbId: m.id,
           title: m.title,
-          rating: m.vote_average?.toFixed(1) ?? 'N/A',
+          rating: m.vote_average != null ? m.vote_average.toFixed(1) : 'N/A',
           posterUrl: getPosterUrl(m.poster_path),
         }));
 
-        setServerTitless(formatted);
+        if (!canceled) {
+          setRecommendations(formatted);
+          setView('recommendations');
+        }
       } catch (e) {
-        setError('failed recommedation');
+        console.error('failed recommendation from TMDB:', e);
+        if (!canceled) {
+          setError('failed recommendation');
+        }
       } finally {
-        setIsLoading(false);
+        if (!canceled) {
+          setIsLoading(false);
+        }
       }
     })();
-  }, [view]);
-  */
+
+    return () => {
+      canceled = true;
+    };
+  }, [serverTitles]);
   
   //handle previous Watching list
   const handleAddRecentWatched = (movie) => {
@@ -126,7 +138,7 @@ function App() {
   if (view === 'capture') {
     return (
       <CapturePage
-        setRecommendations={setRecommendations}
+        setRecommendations={setServerTitles}
         setView={setView}
         isLoading={isLoading}
         setIsLoading={setIsLoading}

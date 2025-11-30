@@ -139,12 +139,15 @@ function CapturePage({ setRecommendations, setView, isLoading, setIsLoading, err
             if (!result) {
                 throw new Error('no response from server');
             }
-            if (!result.recommendations) {
+
+            const movieTitles = result.recommendations || result.movies;
+
+            if (!movieTitles) {
                 console.warn('server response:', result);
-                throw new Error('recommendation field not found in response');
+                throw new Error('no movies or recommendations field found');
             }
 
-            setRecommendations(result.recommendations);
+            setRecommendations(movieTitles);
             setView('recommendations');
         } catch (err) {
             console.error('handleCaptureAndAnalyze error:', err);
