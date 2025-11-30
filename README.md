@@ -57,7 +57,7 @@ The Jetson server performs multimodal emotion inference, updates the user’s em
                       │
                       ▼
            CLIENT → SERVER (HTTP POST)
-─────────────────────────────────────────────────────────────────────────────
+
                       ▼
         ┌────────────────────────────────────────┐
         │           Jetson Server A              │
@@ -89,7 +89,7 @@ The Jetson server performs multimodal emotion inference, updates the user’s em
         └───────────────────┬────────────────────────┘
                             │
                             │ SERVER → CLIENT (HTTP JSON Response)
-─────────────────────────────────────────────────────────────────────────────
+
                             ▼
                    ┌───────────────────────────────┐
                    │ Client Receives Recommendations│
