@@ -224,8 +224,8 @@ def train_on_user_data(csv_file):
 
 def ollama_inference(payload):
 	city = payload["environment"]["city"]
-	lat = payload["environment"]["lat"]
-	lon = payload["environment"]["lon"]
+	lat = float(payload["environment"]["lat"])
+	lon = float(payload["environment"]["lon"])
 	today_status = payload["environment"]["today_status"]
 	tomorrow_status = payload["environment"]["tomorrow_status"]
 	week_day = payload["environment"]["weekday"]
