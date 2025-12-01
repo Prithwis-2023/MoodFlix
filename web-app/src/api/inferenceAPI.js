@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-const JETSON_IP = "172.19.27.2";
+const JETSON_IP = "172.19.8.143";
 
 const API_URL = `http://${JETSON_IP}:8000/inference`;
 const LOG_API_URL = `http://${JETSON_IP}:8000/inference/log`;
@@ -91,10 +91,10 @@ export async function sendInferenceLog({clientSentAt,env,movieTitle}) {
 }
 
 export async function fetchInferenceLogs(limit = 50) {
-    console.log("Fetching inference logs from server...", LOGS_URL);
+    console.log("Fetching inference logs from server...", LOG_API_URL);
 
     try {
-        const response = await fetch(`${LOGS_URL}?limit=${limit}`, {
+        const response = await fetch(`${LOG_API_URL}?limit=${limit}`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",

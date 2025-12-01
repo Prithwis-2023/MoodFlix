@@ -11,6 +11,8 @@ import GetRecommendationButton from './components/GetRecommendationButton';
 import MovieDetailPage from './pages/MovieDetailPage';
 import RecommendationsPage from './pages/RecommendationPage';
 import CapturePage1 from './pages/CapturePage1';
+import { fetchInferenceLogs } from './api/inferenceAPI';
+import { useEnvironment } from './hooks/useEnvironment';
 
 function App() {
   const [view, setView] = useState('capture');
@@ -23,6 +25,27 @@ function App() {
   const [error, setError] = useState(null);
   const [isFromPrevious, setIsFromPrevious] = useState(false);
 
+  const [logHistory, setLogHistory] = useState([]);
+  const [historyMovies, setHistoryMovies] = useState([]);
+
+
+  const { city,weekday, temperature,
+          weather_desc,
+          today_status,
+          tomorrow_status,
+          lat,
+          lon, } = useEnvironment();
+
+  const env = {
+    city,
+    weather_desc,
+    today_status,
+    weekday,
+    temperature,
+    tomorrow_status,
+    lat,
+    lon,
+  };
 
   useEffect(() => {
     // 제목 리스트가 비어있으면 아무 것도 안 함
@@ -121,6 +144,76 @@ function App() {
     setRecentWatched((prev) => prev.filter((m) => m.tmdbId !== tmdbId));
   };
 
+  //recive LOg Data
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+
+        const rawLogs = await fetchInferenceLogs();
+        const mapped = rawLogs.map(log => ({
+          title: log.movieTitle,
+        }));
+        setLogHistory(mapped);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    fetchLogs();
+  }, []);
+
+
+  //convert tmdb object
+  useEffect(() => {
+
+    if (!logHistory || logHistory.length === 0) return;
+
+    let canceled = false;
+
+    (async () => {
+      try {
+
+        const movies = [];
+
+        for (const log of logHistory) {
+
+          const title = log.movieTitle || log.title;
+          if (!title) continue;
+
+          try {
+            const results = await searchMovieByTitle(title);
+            if (results && results.length > 0) {
+              movies.push(results[0]);
+            } else {
+              console.warn('no TMDB result for log title:', title);
+            }
+          } catch (err) {
+            console.error('TMDB search error for log title:', title, err);
+          }
+        }
+
+        const formatted = movies.map((m) => ({
+          id: m.id,
+          tmdbId: m.id,
+          title: m.title,
+          rating:
+            m.vote_average != null ? m.vote_average.toFixed(1) : 'N/A',
+          posterUrl: getPosterUrl(m.poster_path),
+        }));
+
+        if (!canceled) {
+          setHistoryMovies(formatted);
+        }
+      } catch (e) {
+        console.error('failed history mapping from TMDB:', e);
+      }
+    })();
+
+    return () => {
+      canceled = true;
+    };
+  }, [logHistory]);
+
   //lendering detail page
   if (view === 'detail' && selectedMovieId) {
     return (
@@ -130,9 +223,12 @@ function App() {
         onAddRecentWatched={handleAddRecentWatched}
         isFromPrevious={isFromPrevious}
         onRemoveFromRecent={handleRemoveFromRecent}
+        env={env}
       />
     );
   }
+
+  
 
   //capture page
   if (view === 'capture') {
@@ -148,7 +244,7 @@ function App() {
     );
   }
 
-  const env = useEnvironment();
+  
   //recommendation page
   return (
     <RecommendationsPage
@@ -159,7 +255,7 @@ function App() {
       onRecapture={() => setView('capture')}
       onSelectRecommendedMovie={handleSelectRecommendedMovie}
       onSelectPreviousMovie={handleSelectPreviousMovie}
-      env={env} 
+      watchHistory={historyMovies}     
     />
   );
   

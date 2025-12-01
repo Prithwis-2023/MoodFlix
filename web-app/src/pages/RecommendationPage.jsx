@@ -96,6 +96,51 @@ function PreviousWatchingSection({ recentWatched, onSelectMovie }) {
     );
 }
 
+function WatchHistorySection({ watchHistory, onSelectMovie }) {
+    const moviesToShow = (watchHistory || []).slice(0, 20); 
+
+    return (
+        <>
+            <h2 style={styles.sectionTitle}>
+                <span style={{ marginRight: '10px' }}>📜</span>
+                Watch History
+            </h2>
+
+            <div style={styles.scrollContainer}>
+                {moviesToShow.length > 0 ? (
+                    moviesToShow.map((movie) => (
+                        <div
+                            key={movie.tmdbId || movie.id}
+                            style={styles.cardWrapper}
+                            onClick={() => onSelectMovie(movie.tmdbId)}
+                        >
+                            <RecommendationCard
+                                title={movie.title}
+                                rating={movie.rating}
+                                posterUrl={movie.posterUrl}
+                                onClick={() => onSelectMovie(movie.tmdbId)}
+                            />
+                            
+                            {movie.watchedAt && (
+                                <p style={{ fontSize: '0.8rem', marginTop: '4px', opacity: 0.7 }}>
+                                    Watched at: {movie.watchedAt}
+                                </p>
+                            )}
+                        </div>
+                    ))
+                ) : (
+                    <div style={{ ...styles.emptyState, minWidth: '300px' }}>
+                        <p style={styles.emptyText}>
+                            you don't have log..<br />
+                            
+                        </p>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+}
+
 
 //entire Page
 function RecommendationsPage({
@@ -106,6 +151,8 @@ function RecommendationsPage({
     onSelectRecommendedMovie,
     onSelectPreviousMovie,
     onRecapture,
+    watchHistory,
+    onSelectHistoryMovie,
 }) {
     return (
         <div style={styles.page}>
@@ -142,6 +189,11 @@ function RecommendationsPage({
                 <PreviousWatchingSection
                     recentWatched={recentWatched}
                     onSelectMovie={onSelectPreviousMovie}
+                />
+
+                <WatchHistorySection
+                    watchHistory={watchHistory}
+                    onSelectMovie={onSelectHistoryMovie}
                 />
             </div>
         </div>
