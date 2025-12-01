@@ -236,7 +236,8 @@ def ollama_inference(payload):
 	mood = str(get_weighted_smoothed_emotion(payload['images'], emotion_history_with_confidence))
 	audio_data, sr = decode_base64_audio(payload['audio'])
 	voice_tone = estimate_voice_emotion(audio_data, sr)
-
+        
+	global SESSION_EMOTION, SESSION_TONE
 	SESSION_TONE = voice_tone
 	SESSION_EMOTION = mood
 	
@@ -253,7 +254,7 @@ def ollama_inference(payload):
 	
 	response = ask_ollama(prompt)
 	movie_titles = re.findall(r"\d+\.\s*(.*?)\s*\(\d{4}\)", response)
-	return movie_titles	
+	return movie_titles, mood, voice_tone	
 
 def combined_recommendations(primary_movies, clf_tuple, user_context):
 	clf, encoders = clf_tuple

@@ -108,10 +108,10 @@ class JetsonHandler(BaseHTTPRequestHandler):
                 return self._send_json(400, {"error": "Invalid JSON"})
             
             try:
-                primary_movies = ollama_inference(payload)
-                global mood, tone
-                mood = SESSION_EMOTION
-                tone = SESSION_TONE
+                primary_movies, mood, tone = ollama_inference(payload)
+                #global mood, tone
+                #mood = SESSION_EMOTION
+                #tone = SESSION_TONE
             except Exception as e:
                 return self._send_json(500, {"error": f"Ollama failed: {e}"})
 
