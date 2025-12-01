@@ -3,3 +3,4 @@ timestamp,city,latitude,longitude,today_status,tomorrow_status,weekday,weather_d
 2025-11-09 05:50:38.837019,Seoul,37.566,126.9784,Weekend,Weekday,Sunday,broken clouds,10.76,neutral,neutral,Memories of Murder
 2025-11-09 05:55:47.337354,Seoul,37.566,126.9784,Weekend,Weekday,Sunday,broken clouds,10.76,happy,neutral,"""Minari"""
 2025-11-09 10:51:47.859412,Seoul,37.566,126.9784,Weekend,Weekday,Sunday,few clouds,14.76,happy,happy,A Taxi Driver
+2025-12-01T12:41:44.842Z,Seoul,37.5505441,127.0722199,Weekday,Weekday,Monday,clear sky,1.9,,,The Girl on the Train
