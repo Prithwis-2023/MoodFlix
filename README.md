@@ -36,17 +36,17 @@ The Jetson server performs multimodal emotion inference, updates the user’s em
 
 
                                 CLIENT SIDE
-                                ┌─────────────────────────┐
+                                ┌─────────────────────────-┐
                                 │      Web Application     │
                                 │  (Browser: React Client) │
                                 └───────────────┬──────────┘
                                                 │
-                      ┌─────────────────────────┼───────────────────────────┐
-                      │                         │                           │
-        ┌─────────────▼──────────────┐  ┌───────▼──────────────┐  ┌────────▼─────────────┐
-        │ Collect Environment Data    │  │ Capture Webcam Frame │  │  Record Audio Snippet │
-        │   - Location (API)          │  │   (Base64 Image)     │  │   (Base64 Audio)      │
-        │   - Weather (API)           │  └──────────────────────┘  └───────────────────────┘
+                      ┌─────────────────────────┼──────────────────────────┐
+                      │                         │                          │
+        ┌─────────────▼──────────────┐  ┌───────▼──────────────┐  ┌────────▼─────────────-┐
+        │ Collect Environment Data   │  │ Capture Webcam Frame │  │  Record Audio Snippet │
+        │   - Location (API)         │  │   (Base64 Image)     │  │   (Base64 Audio)      │
+        │   - Weather (API)          │  └──────────────────────┘  └───────────────────────┘
         └─────────────┬──────────────┘
                       │
                       ▼
@@ -217,7 +217,7 @@ REACT_APP_SERVER_URL=http://<jetson-ip>:<port>
 | Prithwis Das     | Implementing server-side architecture |
 | Arslanit         | Implementing server-side architecture |
 | Myint Myat Aung  | Implementing client-side architecture |
-| Choi Hyung-chan  | Implementing client-side architecture |
+| Choi Hyung Chan  | Implementing client-side architecture |
 
 
 ### ⭐ Future Enhancements
