@@ -148,6 +148,7 @@ function App() {
     );
   }
 
+  const env = useEnvironment();
   //recommendation page
   return (
     <RecommendationsPage
@@ -158,6 +159,7 @@ function App() {
       onRecapture={() => setView('capture')}
       onSelectRecommendedMovie={handleSelectRecommendedMovie}
       onSelectPreviousMovie={handleSelectPreviousMovie}
+      env={env} 
     />
   );
   

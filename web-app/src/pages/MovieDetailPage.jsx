@@ -3,7 +3,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchMovieById, getPosterUrl } from '../api/tmdbApi';
 import { sendInferenceLog } from '../api/inferenceAPI'; 
 
-function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched, isFromPrevious, onRemoveFromRecent, }) {
+function MovieDetailPage({ tmdbId, env, onBack, onAddRecentWatched, isFromPrevious, onRemoveFromRecent, }) {
     const [movie, setMovie] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -88,8 +88,7 @@ function MovieDetailPage({ tmdbId, onBack, onAddRecentWatched, isFromPrevious, o
         };
         onAddRecentWatched(recentMovie);
 
-        const clientSentAt = new Date().toISOString();
-        const env = null;  
+        const clientSentAt = new Date().toISOString();  
 
         try {
             const result = await sendInferenceLog({

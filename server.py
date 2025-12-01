@@ -32,7 +32,6 @@ def append_log_to_csv(log_payload):
         writer = csv.writer(f)
         writer.writerow([
             client_sent_at,
-            server_received_at,
             temp,
             humidity,
             movie_title,
