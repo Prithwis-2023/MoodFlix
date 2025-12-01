@@ -18,11 +18,12 @@ import librosa
 from pydub import AudioSegment
 
 user_data = "user_logs.csv"
-OLLAMA_MODEL = "tinyllama"
-
-
+OLLAMA_MODEL = "tinyllama" 
 CONFIDENCE_THRESHOLD = 0.50
 NUM_FRAMES = 10
+SESSION_EMOTION = ""
+SESSION_TONE = ""
+
 emotion_history_with_confidence = []
 
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -236,6 +237,9 @@ def ollama_inference(payload):
 	audio_data, sr = decode_base64_audio(payload['audio'])
 	voice_tone = estimate_voice_emotion(audio_data, sr)
 
+	SESSION_TONE = voice_tone
+	SESSION_EMOTION = mood
+	
 	prompt = f"""
 	You are a movie recommendation assistant. The user context is:
 	- Location: {city} ({lat:.2f}, {lon:.2f})
@@ -263,7 +267,7 @@ def combined_recommendations(primary_movies, clf_tuple, user_context):
 	df = pd.DataFrame([{
 		'latitude': user_context['environment']['lat'],
 		'longitude': user_context['environment']['lon'],
-        'temperature': user_context['environment']['temperature'],
+                'temperature': user_context['environment']['temperature'],
 		'city':safe_transform(le_city, user_context['environment']['city']),
 		'today_status':safe_transform(le_today, user_context['environment']['today_status']),
 		'tomorrow_status':safe_transform(le_tomorrow, user_context['environment']['tomorrow_status']),

@@ -6,7 +6,7 @@ import time
 import socket
 import csv
 from urllib.parse import urlparse, parse_qs
-from aiengine import train_on_user_data, ollama_inference, combined_recommendations, emotion_history_with_confidence
+from aiengine import train_on_user_data, ollama_inference, combined_recommendations, emotion_history_with_confidence, SESSION_EMOTION, SESSION_TONE
 
 HOST = "0.0.0.0" 
 PORT = 8000
@@ -16,28 +16,41 @@ CSV_FILE = "user_logs.csv"
 
 clf_tuple = train_on_user_data(CSV_FILE)
 
-
+mood = ""
+tone= ""
 
 def append_log_to_csv(log_payload):
     
     client_sent_at = log_payload.get("clientSentAt", "")
     env = log_payload.get("env") or {}
     temp = env.get("temperature", "")
-    humidity = env.get("humidity", "")
+    lat = env.get("lat", "")
+    lon = env.get("lon", "")
+    city = env.get("city", "")
+    weather_desc = env.get("weather_desc", "")
+    today_status = env.get("today_status", "")
+    tomorrow_status = env.get("tomorrow_status", "")
+    weekday = env.get("weekday", "")
     movie_title = log_payload.get("movieTitle", "")
 
-    server_received_at = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
+    #server_received_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     with open(CSV_FILE, mode="a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             client_sent_at,
+            city,
+            lat,
+            lon,
+            today_status,
+            tomorrow_status,
+            weekday,
+            weather_desc,
             temp,
-            humidity,
+            mood,
+            tone,
             movie_title,
         ])
-
-
 
 class JetsonHandler(BaseHTTPRequestHandler):
 
@@ -68,6 +81,8 @@ class JetsonHandler(BaseHTTPRequestHandler):
             
             try:
                 primary_movies = ollama_inference(payload)
+                mood = SESSION_EMOTION
+                tone = SESSION_TONE
             except Exception as e:
                 return self._send_json(500, {"error": f"Ollama failed: {e}"})
 
