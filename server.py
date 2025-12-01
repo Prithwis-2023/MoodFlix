@@ -13,7 +13,6 @@ PORT = 8000
 IDLE_TIMEOUT = 60
 CSV_FILE = "user_logs.csv"
 
-
 clf_tuple = train_on_user_data(CSV_FILE)
 
 timestamp = ""
@@ -28,41 +27,6 @@ weekday = ""
 mood = ""
 tone= ""
 title = ""
-
-def append_log_to_csv(log_payload):
-    global mood, tone
-    client_sent_at = log_payload.get("clientSentAt", "")
-    env = log_payload.get("env") or {}
-    temp = env.get("temperature", "")
-    lat = env.get("lat", "")
-    lon = env.get("lon", "")
-    city = env.get("city", "")
-    weather_desc = env.get("weather_desc", "")
-    today_status = env.get("today_status", "")
-    tomorrow_status = env.get("tomorrow_status", "")
-    weekday = env.get("weekday", "")
-    movie_title = log_payload.get("movieTitle", "")
-    
-    print(temp)
-    print(weekday)	
-    #server_received_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
-    with open(CSV_FILE, mode="a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            client_sent_at,
-            city,
-            lat,
-            lon,
-            today_status,
-            tomorrow_status,
-            weekday,
-            weather_desc,
-            temp,
-            mood,
-            tone,
-            movie_title,
-        ])
 
 class JetsonHandler(BaseHTTPRequestHandler):
 
