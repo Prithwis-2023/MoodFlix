@@ -16,11 +16,21 @@ CSV_FILE = "user_logs.csv"
 
 clf_tuple = train_on_user_data(CSV_FILE)
 
+timestamp = ""
+temp = ""
+lat = ""
+lon = ""
+city = ""
+weather_desc = ""
+today_status = ""
+tomorrow_status = ""
+weekday = ""
 mood = ""
 tone= ""
+title = ""
 
 def append_log_to_csv(log_payload):
-    
+    global mood, tone
     client_sent_at = log_payload.get("clientSentAt", "")
     env = log_payload.get("env") or {}
     temp = env.get("temperature", "")
@@ -32,7 +42,9 @@ def append_log_to_csv(log_payload):
     tomorrow_status = env.get("tomorrow_status", "")
     weekday = env.get("weekday", "")
     movie_title = log_payload.get("movieTitle", "")
-
+    
+    print(temp)
+    print(weekday)	
     #server_received_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     with open(CSV_FILE, mode="a", newline="", encoding="utf-8") as f:
@@ -81,6 +93,7 @@ class JetsonHandler(BaseHTTPRequestHandler):
             
             try:
                 primary_movies = ollama_inference(payload)
+                global mood, tone
                 mood = SESSION_EMOTION
                 tone = SESSION_TONE
             except Exception as e:
@@ -110,7 +123,24 @@ class JetsonHandler(BaseHTTPRequestHandler):
                 return self._send_json(400, {"error": "movieTitle is required"})
 
             try:
-                append_log_to_csv(log_payload)
+                #append_log_to_csv(log_payload)
+                global timestamp, temp, lat, lon, city, weather_desc, today_status, tomorroe_status, weekday, title
+                timestamp = log_payload.get("clientSentAt", "")
+                env = log_payload.get("env") or {}
+                temp = env.get("temperature", "")
+                lat = env.get("lat", "")
+                lon = env.get("lon", "")
+                city = env.get("city", "")
+                weather_desc = env.get("weather_desc", "")
+                today_status = env.get("today_status", "")
+                tomorrow_status = env.get("tomorrow_status", "")
+                weekday = env.get("weekday", "")
+                title = log_payload.get("movieTitle", "")
+            except PermissionError as e:
+                return self._send_json(500, {
+                    "error":"Permission Error: Cannot write to csv",
+                    "details": str(e)
+                })
             except Exception as e:
                 return self._send_json(500, {"error": f"Failed to write CSV: {e}"})
 
@@ -138,3 +168,19 @@ def run_server():
 
 if __name__ == "__main__":
     run_server()
+    with open(CSV_FILE, mode="a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            timestamp,
+            city,
+            lat,
+            lon,
+            today_status,
+            tomorrow_status,
+            weekday,
+            weather_desc,
+            temp,
+            mood,
+            tone,
+            title,
+        ])
