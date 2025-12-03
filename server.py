@@ -25,7 +25,7 @@ today_status = ""
 tomorrow_status = ""
 weekday = ""
 mood = ""
-tone= ""
+tone = ""
 title = ""
 
 class JetsonHandler(BaseHTTPRequestHandler):
@@ -142,7 +142,7 @@ class JetsonHandler(BaseHTTPRequestHandler):
 
             try:
                 #append_log_to_csv(log_payload)
-                global timestamp, temp, lat, lon, city, weather_desc, today_status, tomorrow_status, weekday,title
+                global timestamp, temp, lat, lon, city, weather_desc, today_status, tomorrow_status, weekday, title
                 timestamp = log_payload.get("clientSentAt", "")
                 env = log_payload.get("env") or {}
                 temp = env.get("temperature", "")
@@ -153,8 +153,8 @@ class JetsonHandler(BaseHTTPRequestHandler):
                 today_status = env.get("today_status", "")
                 tomorrow_status = env.get("tomorrow_status", "")
                 weekday = env.get("weekday", "")
-                mood = env.get("mood", "")
-                tone = env.get("tone", "")
+                mood = log_payload.get("mood", "")
+                tone = log_payload.get("tone", "")
                 title = log_payload.get("movieTitle", "")
  		#CREATE CSV ROW
                 row = [timestamp,city,lat,lon,today_status,tomorrow_status,weekday,weather_desc,temp,mood,tone,title]
