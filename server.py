@@ -6,7 +6,7 @@ import time
 import socket
 import csv
 from urllib.parse import urlparse, parse_qs
-from aiengine import train_on_user_data, ollama_inference, combined_recommendations, emotion_history_with_confidence, SESSION_EMOTION, SESSION_TONE
+from aiengine import train_on_user_data, ollama_inference, combined_recommendations, emotion_history_with_confidence
 
 HOST = "0.0.0.0" 
 PORT = 8000
@@ -122,7 +122,9 @@ class JetsonHandler(BaseHTTPRequestHandler):
 
             return self._send_json(200, {
                 "movies": final_movies,
-                "primary_llm": primary_movies
+                "primary_llm": primary_movies,
+		"mood": mood,
+		"tone": tone,
             })
    
         if self.path == "/inference/log":
@@ -151,6 +153,8 @@ class JetsonHandler(BaseHTTPRequestHandler):
                 today_status = env.get("today_status", "")
                 tomorrow_status = env.get("tomorrow_status", "")
                 weekday = env.get("weekday", "")
+                mood = env.get("mood", "")
+                tone = env.get("tone", "")
                 title = log_payload.get("movieTitle", "")
  		#CREATE CSV ROW
                 row = [timestamp,city,lat,lon,today_status,tomorrow_status,weekday,weather_desc,temp,mood,tone,title]

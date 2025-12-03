@@ -21,8 +21,6 @@ user_data = "user_logs.csv"
 OLLAMA_MODEL = "tinyllama" 
 CONFIDENCE_THRESHOLD = 0.50
 NUM_FRAMES = 10
-SESSION_EMOTION = ""
-SESSION_TONE = ""
 
 emotion_history_with_confidence = []
 
@@ -236,10 +234,6 @@ def ollama_inference(payload):
 	mood = str(get_weighted_smoothed_emotion(payload['images'], emotion_history_with_confidence))
 	audio_data, sr = decode_base64_audio(payload['audio'])
 	voice_tone = estimate_voice_emotion(audio_data, sr)
-        
-	global SESSION_EMOTION, SESSION_TONE
-	SESSION_TONE = voice_tone
-	SESSION_EMOTION = mood
 	
 	prompt = f"""
 	You are a movie recommendation assistant. The user context is:
