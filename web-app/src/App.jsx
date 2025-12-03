@@ -28,6 +28,9 @@ function App() {
   const [logHistory, setLogHistory] = useState([]);
   const [historyMovies, setHistoryMovies] = useState([]);
 
+  const [mood,setMood] = useState(null);
+  const [tone,setTone] = useState(null);
+
 
   const { city,weekday, temperature,
           weather_desc,
@@ -224,6 +227,8 @@ function App() {
         isFromPrevious={isFromPrevious}
         onRemoveFromRecent={handleRemoveFromRecent}
         env={env}
+        mood = {mood}
+        tone = {tone}
       />
     );
   }
@@ -240,6 +245,8 @@ function App() {
         setIsLoading={setIsLoading}
         error={error}
         setError={setError}
+        setMood={setMood}
+        setTone = {setTone}
       />
     );
   }

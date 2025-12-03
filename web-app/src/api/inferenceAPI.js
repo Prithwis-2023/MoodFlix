@@ -52,13 +52,15 @@ export async function sendInferenceRequest(payload) {
     }
 }
 
-export async function sendInferenceLog({clientSentAt,env,movieTitle}) {
+export async function sendInferenceLog({clientSentAt,env,movieTitle,mood,tone}) {
 
     console.log("Sending inference log to server...", LOG_API_URL);
     const logPayload = {
         clientSentAt,
         env,
         movieTitle,
+        mood,
+        tone,
     };
     console.log("=== [DEBUG] Log Payload Sent to Server ===");
     console.log(JSON.stringify(logPayload, null, 2));

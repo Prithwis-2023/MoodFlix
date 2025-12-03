@@ -7,7 +7,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import GetRecommendationButton from '../components/GetRecommendationButton';
 import RecommendationCard from '../components/RecommendationCard';
 
-function CapturePage({ setRecommendations, setView, isLoading, setIsLoading, error, setError }) {
+function CapturePage({ setRecommendations, setView, isLoading, setIsLoading, error, setError,setMood,setTone }) {
     const { videoRef, isWebcamOn, error: webcamError, startWebcam, stopWebcam, captureFrames } =
         useWebcamCapture();
     const { isRecording, error: audioError, startRecording, stopRecording } = useAudioRecorder();
@@ -141,6 +141,8 @@ function CapturePage({ setRecommendations, setView, isLoading, setIsLoading, err
             }
 
             const movieTitles = result.recommendations || result.movies;
+            setMood(result.mood);
+            setTone(result.tone);
 
             if (!movieTitles) {
                 console.warn('server response:', result);

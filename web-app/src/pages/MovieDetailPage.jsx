@@ -3,7 +3,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { fetchMovieById, getPosterUrl } from '../api/tmdbApi';
 import { sendInferenceLog } from '../api/inferenceAPI'; 
 
-function MovieDetailPage({ tmdbId, env, onBack, onAddRecentWatched, isFromPrevious, onRemoveFromRecent, }) {
+function MovieDetailPage({ tmdbId, env, onBack, onAddRecentWatched, isFromPrevious, onRemoveFromRecent,mood,tone }) {
     const [movie, setMovie] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -95,6 +95,8 @@ function MovieDetailPage({ tmdbId, env, onBack, onAddRecentWatched, isFromPrevio
                 clientSentAt,
                 env,
                 movieTitle: movie.title,
+                mood,
+                tone,
             });
 
             console.log(`[Server Log] Log sent successfully for '${movie.title}'`);
