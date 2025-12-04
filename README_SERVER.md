@@ -67,10 +67,10 @@ curl "http://localhost:8000/inference/log?limit=50"
   - Call ollama_inference(payload) -> returns (primary_movies, mood, tone)
   - Call combined_recommendations(primary_movies, clf_tuple, payload) -> final_movies
 - Response:
-  - 200: {"movies": final_movies, "primary_llm": primary_movies, "mood": mood, "tone": tone}
+  - 200: ```{"movies": final_movies, "primary_llm": primary_movies, "mood": mood, "tone": tone}```
   - 400: Invalid JSON
   - 500: Ollama or combination errors with details
-- Example (replace example payload with your actual structure):
+- Example:
 ```bash
 curl -X POST http://localhost:8000/inference \
   -H "Content-Type: application/json" \
@@ -134,17 +134,17 @@ Example CSV row:
 
 Error handling and status codes
 -------------------------------
-- 400 Bad Request: invalid JSON or required field (movieTitle) missing for /inference/log
-- 500 Internal Server Error: failures from ollama_inference, combined_recommendations, or CSV write permissions
-- 404 Not Found: unknown endpoint
-- CORS: The server sets Access-Control-Allow-Origin: * for JSON responses and OPTIONS, enabling broad cross-origin access.
+- **400 Bad Request**: invalid JSON or required field (movieTitle) missing for /inference/log
+- **500 Internal Server Error**: failures from ollama_inference, combined_recommendations, or CSV write permissions
+- **404 Not Found**: unknown endpoint
+- **CORS**: The server sets Access-Control-Allow-Origin: * for JSON responses and OPTIONS, enabling broad cross-origin access.
 
 Important implementation notes & risks
 ------------------------------------
-- Synchronous blocking server: This server uses HTTPServer and handle_request in a loop with a socket timeout. It handles one request at a time; it's not suitable for high concurrency.
-- Heavy work at import time: train_on_user_data(CSV_FILE) runs at import/module-load. This can slow process start or cause issues if CSV_FILE is large. Consider lazy initialization or running training in a background thread/process.
-- File append concurrency: Appending to CSV without file locking can cause corrupted rows if multiple server processes or threads write simultaneously. Use file locks or a transactional store (database) for safety.
-- Error propagation: The handler reports underlying exception messages in 500 responses. Might potentially leak sensitive internal details in production.
+- **Synchronous blocking server**: This server uses HTTPServer and handle_request in a loop with a socket timeout. It handles one request at a time; it's not suitable for high concurrency.
+- **Heavy work at import time**: train_on_user_data(CSV_FILE) runs at import/module-load. This can slow process start or cause issues if CSV_FILE is large. Consider lazy initialization or running training in a background thread/process.
+- **File append concurrency**: Appending to CSV without file locking can cause corrupted rows if multiple server processes or threads write simultaneously. Use file locks or a transactional store (database) for safety.
+- **Error propagation**: The handler reports underlying exception messages in 500 responses. Might potentially leak sensitive internal details in production.
 
 Future improvements
 ------------------------
