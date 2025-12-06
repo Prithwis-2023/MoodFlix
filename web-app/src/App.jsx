@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 
+import version3 from "./animations/version-3.json";
+import Mood_intro from "./sounds/Mood_intro.mp3";
+import { Player } from "@lottiefiles/react-lottie-player";
 import CapturePage from './pages/CapturePage';
 
 import { fetchMoviesByIds, fetchMovieById, getPosterUrl, searchMovieByTitle } from './api/tmdbApi';
@@ -30,6 +33,9 @@ function App() {
 
   const [mood,setMood] = useState(null);
   const [tone,setTone] = useState(null);
+
+  const [showSplash, setShowSplash] = useState(true);
+
 
 
   const { city,weekday, temperature,
@@ -217,6 +223,42 @@ function App() {
     };
   }, [logHistory]);
 
+
+  if (showSplash) {
+    return (
+      <div
+        style={{
+          backgroundColor: "black",
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Player
+          autoplay
+          keepLastFrame
+          src={version3}
+          style={{ width: "50vw", height: "50vwpx" }}
+          onEvent={(event) => {
+            if (event === "load") {
+              const audio = new Audio(Mood_intro);
+              audio.volume = 0.2;
+              audio.play().catch(() => {
+                console.log("Autoplay blocked. Will require user interaction.");
+              });
+            }
+
+            if (event === "complete") {
+              setShowSplash(false);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   //lendering detail page
   if (view === 'detail' && selectedMovieId) {
     return (
@@ -232,6 +274,7 @@ function App() {
       />
     );
   }
+    
 
   
 
