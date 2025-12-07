@@ -28,6 +28,25 @@ mood = ""
 tone = ""
 title = ""
 
+def compute_file_hash(path):
+    if not os.path.exists(path):
+        return None
+    
+    with open(path, "rb") as f:
+        data = f.read()
+
+    return hashlib.sha256(data).hexdigest()
+
+def make_response(message_type, payload, sender="server", code=200):
+    return code, {
+        "protocol" : "MFNP",
+        "version" : 1.0,
+        "sender" : sender,
+        "message_type" : message_type,
+        "payload" : payload,
+    }
+
+
 class JetsonHandler(BaseHTTPRequestHandler):
 
     def _send_json(self, code, obj):
@@ -93,8 +112,11 @@ class JetsonHandler(BaseHTTPRequestHandler):
                             "movieTitle": row[11],
                         })
 
-            return self._send_json(200, logs)
-        return self._send_json(404, {"error": "Unknown endpoint"})
+            status, response = make_response("inference-log", logs)
+            return self._send_json(status, response)
+        
+        status, response = make_response("error", {"reason": "unknown endpoint"}, code=404)
+        return self._send_json(status, response)
 
     def do_POST(self):
         if self.path == "/inference":
@@ -102,49 +124,86 @@ class JetsonHandler(BaseHTTPRequestHandler):
             content_len = int(self.headers.get("Content-Length", 0))
             raw_body = self.rfile.read(content_len)
             
+            # step 1: validating JSON
             try:
-                payload = json.loads(raw_body.decode())
+                request_obj = json.loads(raw_body.decode())
             except:
-                return self._send_json(400, {"error": "Invalid JSON"})
+                status, response = make_response("error", {"reason": "Invalid JSON"}, code=400)
+                return self._send_json(status, response)
             
+            # step 2: validate MFNP format
+            required_keys = ["protocol", "version", "sender", "message_type", "payload"]
+            if not all(k in request_obj for k in required_keys):
+                status, response = make_response("error", {"reason": "Invalid MNFP message format"}, code=400)
+                return self._send_json(status, response)
+            
+            if request_obj["protocol"] != "MFNP":
+                status, response = make_response("error", {"reason": "Unsupported protocol"}, code=400)
+                return self._send_json(status, response)
+
+            if request_obj["message_type"] != "inference":
+                status, response = make_response("error", {"reason": "Wrong message type for /inference"}, code=400)
+                return self._send_json(status, response)
+            
+            # data client intended to send
             try:
-                primary_movies, mood, tone = ollama_inference(payload)
-                #global mood, tone
-                #mood = SESSION_EMOTION
-                #tone = SESSION_TONE
+                primary_movies, mood, tone = ollama_inference(request_obj["payload"])
             except Exception as e:
-                return self._send_json(500, {"error": f"Ollama failed: {e}"})
+                status, response = make_response("Ollama error", {"reason": e}, code=500)
+                return self._send_json(status, response)
 
             try:
-                final_movies = combined_recommendations(primary_movies, clf_tuple, payload)
+                final_movies = combined_recommendations(primary_movies, clf_tuple, request_obj["payload"])
             except Exception as e:
-                return self._send_json(500, {"error": f"Model combine error: {e}"})
+                status, response = make_response("Model combine error", {"reason": e}, code=500)
+                return self._send_json(status, response)
 
-            return self._send_json(200, {
-                "movies": final_movies,
-                "primary_llm": primary_movies,
-		"mood": mood,
-		"tone": tone,
-            })
+            status, response = make_response(
+                "inference",
+                {
+                    "movies" : final_movies,
+                    "primary_llm" : primary_movies,
+                    "mood" : mood,
+                    "tone" : tone
+                },
+                sender="server"
+            )
+            return self._send_json(status, response)
    
         if self.path == "/inference/log":
             content_len = int(self.headers.get("Content-Length", 0))
             raw_body = self.rfile.read(content_len)
 
+            # validate json
             try:
-                log_payload = json.loads(raw_body.decode())
+                request_obj = json.loads(raw_body.decode())
             except:
-                return self._send_json(400, {"error": "Invalid JSON"})
+                status, response = make_response("error", {"reason": "Invalid JSON"}, code=400)
+                return self._send_json(status, response)
 
+            # validate MFNP format
+            required_keys = ["protocol", "version", "sender", "message_type", "payload"]
+            if not all(k in request_obj for k in required_keys):
+                status, response = make_response("error", {"reason": "Invalid MNFP message format"}, code=400)
+                return self._send_json(status, response)
+            
+            if request_obj["protocol"] != "MFNP":
+                status, response = make_response("error", {"reason": "Unsupported protocol"}, code=400)
+                return self._send_json(status, response)
+
+            if request_obj["message_type"] != "inference-log":
+                status, response = make_response("error", {"reason": "Wrong message type for /inference/log"}, code=400)
+                return self._send_json(status, response)
         
-            if "movieTitle" not in log_payload:
-                return self._send_json(400, {"error": "movieTitle is required"})
+            if "movieTitle" not in request_obj["payload"]:
+                status, response = make_response("payload error", {"reason": "movieTitle is required"}, code=400)
+                return self._send_json(status, response)
 
+            # data client intended to send
             try:
-                #append_log_to_csv(log_payload)
                 global timestamp, temp, lat, lon, city, weather_desc, today_status, tomorrow_status, weekday, title
-                timestamp = log_payload.get("clientSentAt", "")
-                env = log_payload.get("env") or {}
+                timestamp = request_obj["payload"].get("clientSentAt", "")
+                env = request_obj["payload"].get("env") or {}
                 temp = env.get("temperature", "")
                 lat = env.get("lat", "")
                 lon = env.get("lon", "")
@@ -153,28 +212,29 @@ class JetsonHandler(BaseHTTPRequestHandler):
                 today_status = env.get("today_status", "")
                 tomorrow_status = env.get("tomorrow_status", "")
                 weekday = env.get("weekday", "")
-                mood = log_payload.get("mood", "")
-                tone = log_payload.get("tone", "")
-                title = log_payload.get("movieTitle", "")
- 		#CREATE CSV ROW
+                mood = request_obj["payload"].get("mood", "")
+                tone = request_obj["payload"].get("tone", "")
+                title = request_obj["payload"].get("movieTitle", "")
+ 		        
+                #CREATE CSV ROW
                 row = [timestamp,city,lat,lon,today_status,tomorrow_status,weekday,weather_desc,temp,mood,tone,title]
 
-		# WRITE IMMEDIATELY
+		        # WRITE IMMEDIATELY
                 with open(CSV_FILE, mode="a", newline="", encoding="utf-8") as f:
                     writer = csv.writer(f)
                     writer.writerow(row)
             except PermissionError as e:
-                return self._send_json(500, {
-                    "error":"Permission Error: Cannot write to csv",
-                    "details": str(e)
-                })
+                status, response = make_response("error", {"reason": "Permission Error: Cannot write to csv"}, code=500)
+                return self._send_json(status, response)
             except Exception as e:
-                return self._send_json(500, {"error": f"Failed to write CSV: {e}"})
+                status, response = make_response("error", {"reason": f"Failed to write CSV: {e}"}, code=500)
+                return self._send_json(status, response)
 
+            status, response = make_response("success", {"reason": "log saved in user_logs.csv"}, code=200)
+            return self._send_json(status, response)
         
-            return self._send_json(200, {"status": "ok", "message": "log saved"})
-        
-        return self._send_json(404, {"error": "Unknown endpoint"})
+        status, response = make_response("error", {"reason": "unknown endpoint"}, code=404)
+        return self._send_json(status, response)
 
 def run_server():
     server = HTTPServer((HOST, PORT), JetsonHandler)
