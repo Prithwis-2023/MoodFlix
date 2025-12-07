@@ -9,8 +9,10 @@ const LOG_API_URL = `http://${JETSON_IP}:8000/inference/log`;
 export async function sendInferenceRequest(payload) {
     console.log("Sending request to AI server...", API_URL);
 
-    console.log("=== [DEBUG] Final Payload Sent to Server ===");
-    console.log(JSON.stringify(payload, null, 2));
+    const mfnpRequest = wrapMFNP("inference", payload);
+
+    console.log("=== [DEBUG] Final MFNP Sent to Server ===");
+    console.log(JSON.stringify(mfnpRequest, null, 2));
     console.log("================================================");
 
     try {
@@ -23,7 +25,7 @@ export async function sendInferenceRequest(payload) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(mfnpRequest),
         });
 
         const endTime = Date.now();
@@ -37,7 +39,12 @@ export async function sendInferenceRequest(payload) {
         }
 
         // 200 OK 응답
-        const result = await response.json();
+        const rawResult = await response.json();
+        console.log("=== [DEBUG] Raw server result ===");
+        console.log(JSON.stringify(rawResult, null, 2));
+
+        const result = unwrapMFNPResponse(rawResult);
+
         console.log("Inference successful:", result);
         return result;
 
@@ -55,15 +62,16 @@ export async function sendInferenceRequest(payload) {
 export async function sendInferenceLog({clientSentAt,env,movieTitle,mood,tone}) {
 
     console.log("Sending inference log to server...", LOG_API_URL);
-    const logPayload = {
+    const payload = {
         clientSentAt,
         env,
         movieTitle,
         mood,
         tone,
     };
-    console.log("=== [DEBUG] Log Payload Sent to Server ===");
-    console.log(JSON.stringify(logPayload, null, 2));
+    const mfnpRequest = wrapMFNP("inference-log",payload)
+    console.log("=== [DEBUG] Log mfnp Sent to Server ===");
+    console.log(JSON.stringify(mfnpRequest, null, 2));
     console.log("==========================================");
 
     try {
@@ -73,7 +81,7 @@ export async function sendInferenceLog({clientSentAt,env,movieTitle,mood,tone}) 
                 "Content-Type": "application/json",
                 "Accept": "application/json",
             },
-            body: JSON.stringify(logPayload),
+            body: JSON.stringify(mfnpRequest),
         });
 
         if (!response.ok) {
@@ -82,7 +90,8 @@ export async function sendInferenceLog({clientSentAt,env,movieTitle,mood,tone}) 
             throw new Error(`Log server returned ${response.status}`);
         }
 
-        const result = await response.json().catch(() => null);
+        const raw = await response.json().catch(() => null);
+        const result = unwrapMFNPResponse(raw);
         console.log("Log saved successfully:", result);
         return result;
 
@@ -109,7 +118,8 @@ export async function fetchInferenceLogs(limit = 50) {
             throw new Error(`Log fetch returned ${response.status}`);
         }
 
-        const logs = await response.json();
+        const rawLogs = await response.json();
+        const logs = unwrapMFNPResponse(rawLogs);
         console.log("Logs fetched:", logs);
         return logs;
 
@@ -119,4 +129,24 @@ export async function fetchInferenceLogs(limit = 50) {
     }
 }
 
- 
+export function unwrapMFNPResponse(json) {
+    const { protocol, version, sender, message_type, payload  } = json;
+
+
+    console.log("[MFNP] meta =", { protocol, version, sender, message_type });
+    console.log("[MFNP] payload =", payload);
+
+
+    return payload;
+
+}
+
+export function wrapMFNP( message_type, payload ) {
+    return 200,{
+        protocol: "MFNP",
+        version: 1.0,
+        sender: "client",
+        message_type: message_type,
+        payload
+    };
+}

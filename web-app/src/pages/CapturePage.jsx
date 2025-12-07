@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useWebcamCapture } from '../hooks/useWebcamCapture';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { useEnvironment } from '../hooks/useEnvironment';
-import { sendInferenceRequest } from '../api/inferenceAPI';
+import { sendInferenceRequest, wrapMFNP } from '../api/inferenceAPI';
 import LoadingSpinner from '../components/LoadingSpinner';
 import GetRecommendationButton from '../components/GetRecommendationButton';
 import RecommendationCard from '../components/RecommendationCard';
