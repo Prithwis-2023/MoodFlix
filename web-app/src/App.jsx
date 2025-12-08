@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 
 import version3 from "./animations/version-3.json";
-import Mood_intro from "./sounds/Mood_intro.mp3";
+import Mood_intro from "./sounds/moodflix_Original.wav";
 import { Player } from "@lottiefiles/react-lottie-player";
 import CapturePage from './pages/CapturePage';
 
@@ -35,8 +35,7 @@ function App() {
   const [tone,setTone] = useState(null);
 
   const [showSplash, setShowSplash] = useState(true);
-
-
+  const [hasStarted, setHasStarted] = useState(false);
 
   const { city,weekday, temperature,
           weather_desc,
@@ -223,6 +222,27 @@ function App() {
     };
   }, [logHistory]);
 
+  if (!hasStarted) {
+    return (
+      <div
+        onClick={() => setHasStarted(true)} 
+        style={{
+          backgroundColor: "black",
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          cursor: "pointer", 
+          color: "white",
+          flexDirection: "column"
+        }}
+      >
+        <h1 style={{ fontSize: "2rem", marginBottom: "1rem" }}>MOODFLIX</h1>
+        <p style={{ animation: "blink 1.5s infinite" }}>Click to Start</p>
+      </div>
+    );
+  }
 
   if (showSplash) {
     return (
@@ -239,12 +259,13 @@ function App() {
         <Player
           autoplay
           keepLastFrame
+          speed={0.5}
           src={version3}
           style={{ width: "50vw", height: "50vwpx" }}
           onEvent={(event) => {
             if (event === "load") {
               const audio = new Audio(Mood_intro);
-              audio.volume = 0.2;
+              audio.volume = 1.0;
               audio.play().catch(() => {
                 console.log("Autoplay blocked. Will require user interaction.");
               });

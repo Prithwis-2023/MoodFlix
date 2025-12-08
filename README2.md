@@ -63,8 +63,8 @@ sequenceDiagram
     User->>MoodflixWeb: Select a recommended movie
     MoodflixWeb->>JetsonServer: POST /inference/log\n{movieTitle, ...}
     JetsonServer-->>MoodflixWeb: log saved
-    MoodflixWeb->>JetsonServer: GET /inference/log?limit=50
-    JetsonServer-->>MoodflixWeb: recent logs
+    MoodflixWeb->>JetsonServer: GET /inference/log
+    JetsonServer-->>MoodflixWeb: logs
 ```
 
 ---
@@ -79,13 +79,14 @@ graph LR
 
   E[POST /inference/log] --> F[Append to CSV log]
 
-  G[GET /inference/log] --> H[Return last N logs]
+  G[GET /inference/log] --> H[Return logs]
 
 ```
 
 ---
 
-## 🔬 Payload Formats
+## 🔬 MoodFlix Network Protocol (MFNP)
+
 
 **POST `/inference`**  
 ```json

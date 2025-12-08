@@ -1,9 +1,6 @@
-const TMDB_API_KEY = "7ecef90d8e1fd42ba6acb3b206881092";
-
-
-
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const TMDB_BASE_URL = import.meta.env.VITE_TMDB_BASE_URL;
+const TMDB_IMAGE_BASE_URL = import.meta.env.VITE_TMDB_IMAGE_BASE_URL;
 
 if (!TMDB_API_KEY) {
     console.warn(
