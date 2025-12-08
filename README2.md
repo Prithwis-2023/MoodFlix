@@ -90,27 +90,39 @@ graph LR
 **POST `/inference`**  
 ```json
 {
-  "environment": {
-    "city": "Seoul",
-    "lat": "37.566",
-    "lon": "126.9784",
-    "weather_desc": "Cloudy",
-    "temperature": "13.5",
-    "weekday": "Sunday",
-    "today_status": "Weekend",
+  "protocol": "MFNP",
+  "version": 1.0,
+  "sender": "client",
+  "message_type": "inference",
+  "payload": {
+      "environment": {
+      "city": "Seoul",
+      "lat": "37.566",
+      "lon": "126.9784",
+      "weather_desc": "Cloudy",
+      "temperature": "13.5",
+      "weekday": "Sunday",
+      "today_status": "Weekend",
     ...
   },
   "images": "<base64-encoded-frame>",
   "audio": "<base64-encoded-waveform>"
+  }
 }
 ```
 **Response:**  
 ```json
 {
-  "movies": [ ... ],
-  "primary_llm": [ ... ],
-  "mood": "happy",
-  "tone": "gentle"
+  "protocol": "MFNP",
+  "version": 1.0,
+  "sender": "server",
+  "message_type": "inference",
+  "payload": {
+      "movies": [ ... ],
+      "primary_llm": [ ... ],
+      "mood": "happy",
+      "tone": "gentle"
+  }
 }
 ```
 
@@ -118,18 +130,45 @@ graph LR
 Records the final selection plus context:
 ```json
 {
-  "clientSentAt": "2025-12-04T12:34:56Z",
-  "movieTitle": "Minari",
-  "env": {...},
-  "mood": "happy",
-  "tone": "gentle"
+  "protocol": "MFNP",
+  "version": 1.0,
+  "sender": "client",
+  "message_type": "inference-log",
+  "payload": {
+      "clientSentAt": "2025-12-04T12:34:56Z",
+      "movieTitle": "Minari",
+      "env": {...},
+      "mood": "happy",
+      "tone": "gentle"
+  }
 }
 ```
 
-**GET `/inference/log?limit=N`**  
+**GET `/inference/log`**  
 Fetches the last N entries for feedback analytics.
-
----
+```json
+{
+  "protocol": "MFNP",
+  "version": 1.0,
+  "sender": "server",
+  "message_type": "inference-log",
+  "payload": {
+      "clientSentAt": "2025-12-04T12:34:56Z",
+      "env": {...},
+      "mood": "happy",
+      "tone": "gentle",
+      "movieTitle": "Minari",
+  },
+  {
+      "clientSentAt": "2025-12-04T12:34:56Z",
+      "env": {...},
+      "mood": "happy",
+      "tone": "gentle",
+      "movieTitle": "Texi driver",
+  },
+  ...
+}
+```
 
 ## 🖥️ Client Architecture (React, JavaScript)
 
