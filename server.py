@@ -37,6 +37,40 @@ def compute_file_hash(path):
 
     return hashlib.sha256(data).hexdigest()
 
+def merge_csv_data(local_path, incoming_rows):
+
+    merged_rows = []
+    seen = set()
+
+    # load the existing rows
+    if os.path.exists(local_path):
+        with open(local_path, mode="r", encoding="utf-8") as f:
+            reader = list(csv.reader(f))
+            if reader:
+                existing_header = reader[0]
+                existing_data = reader[1:]
+
+    for row in existing_data:
+        key = tuple(row)
+        if key not in seen:
+            seen.add(key)
+            merged_rows.append(row)
+        
+    for row in incoming_rows[1:]:
+        key = tuple(row)
+        if key not in seen:
+            seen.add(key)
+            merged_rows.append(row)
+
+    # write back without duplication
+    with open(local_path, mode="w",encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(existing_header)
+        writer.writerows(merged_rows)
+
+    return len(merged_rows)
+ 
+
 def make_response(message_type, payload, sender="server", code=200):
     return code, {
         "protocol" : "MFNP",
@@ -233,6 +267,66 @@ class JetsonHandler(BaseHTTPRequestHandler):
             status, response = make_response("success", {"reason": "log saved in user_logs.csv"}, code=200)
             return self._send_json(status, response)
         
+        if self.path == "/sync":
+            content_len = int(self.headers.get("Content-Length", 0))
+            raw_body = self.rfile.read(content_len)
+            
+            # step 1: validating JSON
+            try:
+                request_obj = json.loads(raw_body.decode())
+            except:
+                status, response = make_response("error", {"reason": "Invalid JSON"}, code=400)
+                return self._send_json(status, response)
+            
+            # step 2: validate MFNP format
+            required_keys = ["protocol", "version", "sender", "message_type", "payload"]
+            if not all(k in request_obj for k in required_keys):
+                status, response = make_response("error", {"reason": "Invalid MNFP message format"}, code=400)
+                return self._send_json(status, response)
+            
+            if request_obj["protocol"] != "MFNP":
+                status, response = make_response("error", {"reason": "Unsupported protocol"}, code=400)
+                return self._send_json(status, response)
+
+            if request_obj["message_type"] not in ["sync-request", "sync-merge"]:
+                status, response = make_response("error", {"reason": "Wrong message type for /sync"}, code=400)
+                return self._send_json(status, response)
+
+            if request_obj["message_type"] == "sync-request":
+                incoming_rows = request_obj["payload"].get("rows", [])
+                merge_csv_data(CSV_FILE, incoming_rows)
+
+                final_rows = []
+                with open(CSV_FILE, mode="r", encoding="utf-8") as f:
+                    final_rows = list(csv.reader(f))
+
+                status, response = make_response(
+                    "sync-merge",
+                    {"rows" : final_rows},
+                    sender="server"
+                ) 
+                return self._send_json(status, response)
+
+            if request_obj["message_type"] == "sync-merge":
+                incoming_rows = request_obj["payload"].get("rows", [])
+                
+                try:
+                    with open(CSV_FILE, mode="w", newline="", encoding="utf-8") as f:
+                        writer = csv.writer(f)
+                        for row in incoming_rows:
+                            writer.writerow(row)
+
+                    status, response = make_response (
+                        "sync_ack",
+                        {"status" : "synced"},
+                        sender="server"
+                    )
+                    return self._send_json(status, response)
+                    
+                except Exception as e:
+                    status, response = make_response("error", {"reason": f"Write failed: {e}"}, code=500)
+                    return self._send_json(status, response)    
+
         status, response = make_response("error", {"reason": "unknown endpoint"}, code=404)
         return self._send_json(status, response)
 
