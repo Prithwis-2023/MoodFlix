@@ -215,7 +215,6 @@ Fetches the last N entries for feedback analytics.
 ```bash
 cd web-app
 npx serve -s dist -l 3000
-npm start
 ```
 **Server (Jetson):**
 ```bash
@@ -235,14 +234,15 @@ python server.py
 ## 🤝 Contributions
 | Name              | Role                                 |
 |------------------|---------------------------------------|
-| Prithwis Das     | Implementing server-side architecture |
-| Arslanit         | Implementing server-side architecture |
-| Myint Myat Aung  | Implementing client-side architecture |
-| Choi Hyung Chan  | Implementing client-side architecture |
+| Prithwis Das     | Implementing application-layer protocol and server-side architecture |
+| Arslanit         | Implementing server-side architecture and hardware design |
+| Myint Myat Aung  | Implementing client-side architecture|
+| Choi Hyung Chan  | Implementing application-layer protocol and client-side architecture |
 ---
 
 ## 🔍 See also
 
 > API details and more code:  
 > [Browse MoodFlix on GitHub](https://github.com/Prithwis-2023/MoodFlix/)
+
 
