@@ -235,7 +235,7 @@ python server.py
 | Name              | Role                                 |
 |------------------|---------------------------------------|
 | Prithwis Das     | Implementing application-layer protocol and server-side architecture |
-| Arslanit         | Implementing server-side architecture and hardware design |
+| Shipulin Arslan         | Implementing server-side architecture and hardware design |
 | Myint Myat Aung  | Implementing client-side architecture|
 | Choi Hyung Chan  | Implementing application-layer protocol and client-side architecture |
 ---
@@ -244,5 +244,6 @@ python server.py
 
 > API details and more code:  
 > [Browse MoodFlix on GitHub](https://github.com/Prithwis-2023/MoodFlix/)
+
 
 
