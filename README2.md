@@ -179,24 +179,24 @@ Fetches the last N entries for feedback analytics.
   - `sendInferenceRequest` in [`inferenceAPI.js`](web-app/src/api/inferenceAPI.js) for REST calls.
   - TMDB API (`tmdbApi.js`) for movie details.
 
-*For more details, see [`web-app/README.md`](web-app/README.md).*
+*For more details, see [`README_CLIENT.md`](README_CLIENT.md).*
 
 ---
 
 ## 🧠 Server-Side Architecture (Jetson, Python)
 
-- **Core:** REST server (`server.py`/`server2.py`) on NVIDIA Jetson.
+- **Core:** REST server (`server.py`) on NVIDIA Jetson.
 - **AI Processing:** Calls **Ollama LLM** and local classifiers for hybrid recommendation.
 - **Logging:** Immediate CSV write of feedback events and user sessions (see `user_logs.csv`).
 - **Endpoints:** Precise docs in [`README_SERVER.md`](README_SERVER.md).
 
-*For ML model/network design, see [`aiengine.py`](aiengine.py).*
+*For ML model/network design, see [`REAdME_AIENGINE.md`](README_AIENGINE.md).*
 
 ---
 
 ## 🌐 Networking Features
 
-- **Distributed Design:** (Planned) Multi-node protocol via `MFNP` message format, including hash-based file validation for user logs (see `server2.py`).
+- **Distributed Design:** (Planned) Multi-node protocol via `MFNP` message format, including hash-based file validation for user logs (see `server.py`).
 - **WebSocket Experimental:** Real-time signaling and inference streaming from client (see `CapturePage1.jsx`).
 
 ---
@@ -214,34 +214,35 @@ Fetches the last N entries for feedback analytics.
 **Client (React):**
 ```bash
 cd web-app
-npm install
+npx serve -s dist -l 3000
 npm start
 ```
 **Server (Jetson):**
 ```bash
 python server.py
-# or for protocol experiments:
-python server2.py
 ```
 
 ---
 
 ## 🔗 References
 
-- [web-app/README.md](web-app/README.md) — Client setup/architecture
+- [README_CLIENT.md](README_CLIENT.md) — Client setup/architecture
 - [README_SERVER.md](README_SERVER.md) — Backend endpoint docs, logs, protocol
-- [aiengine.py](aiengine.py) — ML/AI mood pipeline
+- [README_AIENGINE.md](README_AIENGINE.md) — ML/AI mood pipeline docs
 
 ---
 
-## 🤝 Contributing
-
-- Submissions for new endpoints, distributed network protocols, and improved feedback logging welcome!
-- Please update diagrams and flowcharts for major design changes.
-
+## 🤝 Contributions
+| Name              | Role                                 |
+|------------------|---------------------------------------|
+| Prithwis Das     | Implementing server-side architecture |
+| Arslanit         | Implementing server-side architecture |
+| Myint Myat Aung  | Implementing client-side architecture |
+| Choi Hyung Chan  | Implementing client-side architecture |
 ---
 
 ## 🔍 See also
 
 > API details and more code:  
 > [Browse MoodFlix on GitHub](https://github.com/Prithwis-2023/MoodFlix/)
+
